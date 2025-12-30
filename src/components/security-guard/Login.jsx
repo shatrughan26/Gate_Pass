@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import asuLogo from "../../assets/asu-logo.png";
 
-const GuardLogin = () => {
+export default function GuardLogin() {
   const navigate = useNavigate();
   const [guardId, setGuardId] = useState("");
   const [password, setPassword] = useState("");
@@ -16,36 +17,82 @@ const GuardLogin = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white p-8 rounded-xl shadow-md w-full max-w-sm">
-        <h2 className="text-2xl font-semibold text-center mb-6">
-          Guard Login
-        </h2>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        <div className="bg-white rounded-lg shadow-xl p-8">
 
-        <form onSubmit={handleLogin} className="space-y-4">
-          <input
-            type="text"
-            placeholder="Guard ID"
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
-            value={guardId}
-            onChange={(e) => setGuardId(e.target.value)}
-          />
+          {/* University Logo */}
+          <div className="flex justify-center mb-6">
+            <img
+              src={asuLogo}
+              alt="Apeejay Stya University Logo"
+              className="w-24 h-24 object-contain rounded-full shadow-md"
+            />
+          </div>
 
-          <input
-            type="password"
-            placeholder="Password"
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-black"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
+          {/* Title */}
+          <div className="text-center mb-2">
+            <h1 className="text-2xl font-bold text-gray-800">
+              Apeejay Stya University
+            </h1>
+            <h2 className="text-lg text-gray-600 mt-1">
+              Security Guard Login
+            </h2>
+          </div>
 
-          <button className="w-full bg-black text-white py-2 rounded-lg hover:bg-gray-800 transition">
-            Login
-          </button>
-        </form>
+          <div className="border-t border-gray-200 my-6"></div>
+
+          {/* Login Form */}
+          <form onSubmit={handleLogin}>
+            <div className="mb-5">
+              <label
+                htmlFor="guardId"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
+                Guard ID
+              </label>
+              <input
+                type="text"
+                id="guardId"
+                value={guardId}
+                onChange={(e) => setGuardId(e.target.value)}
+                placeholder="Enter your guard ID"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                required
+              />
+            </div>
+
+            <div className="mb-6">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
+                Password
+              </label>
+              <input
+                type="password"
+                id="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter your password"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                required
+              />
+            </div>
+
+            <button
+              type="submit"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition duration-200 shadow-md hover:shadow-lg"
+            >
+              Login
+            </button>
+          </form>
+
+          <p className="text-center text-sm text-gray-500 mt-6">
+            Authorized personnel only
+          </p>
+        </div>
       </div>
     </div>
   );
-};
-
-export default GuardLogin;
+}
