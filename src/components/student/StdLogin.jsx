@@ -29,7 +29,7 @@ export default function StudentLogin() {
               Apeejay Stya University
             </h1>
             <h2 className="text-lg text-gray-600 mt-1">
-              Tagore Boys Hostel
+              Hostel Pass
             </h2>
           </div>
 
