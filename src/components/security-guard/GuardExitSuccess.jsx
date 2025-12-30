@@ -13,7 +13,7 @@ const GuardExitSuccess = () => {
       </p>
 
       <button
-        onClick={() => navigate("/guard/login")}
+        onClick={() => navigate("/")}
         className="bg-black text-white px-6 py-2 rounded-lg"
       >
         Back to Login
