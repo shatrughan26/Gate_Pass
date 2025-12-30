@@ -1,19 +1,12 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import asuLogo from "../../assets/asu-logo.png";
+import asuLogo from "../../assets/asu-logo.png"
 
-export default function GuardLogin() {
-  const navigate = useNavigate();
-  const [guardId, setGuardId] = useState("");
-  const [password, setPassword] = useState("");
+export default function StudentLogin() {
+  const [enrollment, setEnrollment] = useState("");
 
-  const handleLogin = (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-
-    // Frontend-only mock login
-    if (guardId && password) {
-      navigate("/guard/scan");
-    }
+    console.log("Enrollment Number:", enrollment);
   };
 
   return (
@@ -30,52 +23,34 @@ export default function GuardLogin() {
             />
           </div>
 
-          {/* Title */}
+          {/* University Name */}
           <div className="text-center mb-2">
             <h1 className="text-2xl font-bold text-gray-800">
               Apeejay Stya University
             </h1>
             <h2 className="text-lg text-gray-600 mt-1">
-              Security Guard Login
+              Hostel Pass
             </h2>
           </div>
 
           <div className="border-t border-gray-200 my-6"></div>
 
           {/* Login Form */}
-          <form onSubmit={handleLogin}>
-            <div className="mb-5">
+          <form onSubmit={handleSubmit}>
+            <div className="mb-6">
               <label
-                htmlFor="guardId"
+                htmlFor="enrollment"
                 className="block text-sm font-medium text-gray-700 mb-2"
               >
-                Guard ID
+                Enrollment Number
               </label>
               <input
                 type="text"
-                id="guardId"
-                value={guardId}
-                onChange={(e) => setGuardId(e.target.value)}
-                placeholder="Enter your guard ID"
+                id="enrollment"
+                value={enrollment}
+                onChange={(e) => setEnrollment(e.target.value)}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
-                required
-              />
-            </div>
-
-            <div className="mb-6">
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
-                Password
-              </label>
-              <input
-                type="password"
-                id="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
+                placeholder="Enter your enrollment number"
                 required
               />
             </div>
@@ -89,7 +64,7 @@ export default function GuardLogin() {
           </form>
 
           <p className="text-center text-sm text-gray-500 mt-6">
-            Authorized personnel only
+            Need help? Contact hostel administration
           </p>
         </div>
       </div>
