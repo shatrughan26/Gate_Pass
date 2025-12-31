@@ -14,12 +14,10 @@ const firebaseConfig = {
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || ""
 };
 
-
 // Basic configuration check to provide helpful diagnostics when env vars are missing
 const requiredKeys = ["apiKey", "authDomain", "projectId", "appId"];
 const missingKeys = requiredKeys.filter((k) => !firebaseConfig[k]);
 export const isFirebaseConfigured = missingKeys.length === 0;
-
 if (!isFirebaseConfigured) {
   console.error(
     `[Firebase] Missing configuration keys: ${missingKeys.join(", ")}. ` +
