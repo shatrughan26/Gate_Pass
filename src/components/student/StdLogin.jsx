@@ -1,12 +1,18 @@
 import { useState } from "react";
-import asuLogo from "../../assets/asu-logo.png"
+import { useNavigate } from "react-router-dom";
+import asuLogo from "../../assets/asu-logo.png";
 
 export default function StudentLogin() {
   const [enrollment, setEnrollment] = useState("");
+  const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
     console.log("Enrollment Number:", enrollment);
+
+    // Navigate to pass selection page
+    navigate("/student/pass-type");
   };
 
   return (
@@ -66,6 +72,7 @@ export default function StudentLogin() {
           <p className="text-center text-sm text-gray-500 mt-6">
             Need help? Contact hostel administration
           </p>
+
         </div>
       </div>
     </div>
