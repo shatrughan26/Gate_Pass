@@ -1,101 +1,116 @@
-// src/components/warden/WardenPortal.jsx
-import { useState } from 'react';
-import { UserPlus, Upload, User, Lock, Eye, EyeOff, Phone, Hash, Home, Users, Building } from 'lucide-react';
+// src/components/warden/WardenDashboard.jsx
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-export default function WardenPortal() {
-  const [username] = useState("warden"); // demo
+export default function StudentInfo() {
+  const navigate = useNavigate();
   const [studentData, setStudentData] = useState({
-    name: '', enrollmentNumber: '', address: '', parentsName: '', phoneNumber: '', roomNumber: '', studentImage: null
+    name: "",
+    enrollment: "",
+    address: "",
+    roomNumber: "",
+    fatherName: "",
+    phoneNumber: "",
   });
-  const [imagePreview, setImagePreview] = useState('');
-  const [formError, setFormError] = useState('');
-  const [successMessage, setSuccessMessage] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setStudentData(prev => ({ ...prev, [name]: value }));
+  const handleChange = (e) => {
+    setStudentData({ ...studentData, [e.target.name]: e.target.value });
   };
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    setStudentData(prev => ({ ...prev, studentImage: file }));
-    const reader = new FileReader();
-    reader.onloadend = () => setImagePreview(reader.result);
-    reader.readAsDataURL(file);
-  };
+  const handleAddStudent = () => {
+    const { name, enrollment, address, roomNumber, fatherName, phoneNumber } = studentData;
 
-  const handleSubmitStudent = () => {
-    setFormError('');
-    if (!studentData.name || !studentData.enrollmentNumber) {
-      setFormError('Please fill required fields');
-      return;
+    if (name && enrollment && address && roomNumber && fatherName && phoneNumber) {
+      // Placeholder for backend API call
+      console.log("Student added:", studentData);
+
+      // Reset form
+      setStudentData({
+        name: "",
+        enrollment: "",
+        address: "",
+        roomNumber: "",
+        fatherName: "",
+        phoneNumber: "",
+      });
+    } else {
+      alert("Please fill all fields!");
     }
-    setSuccessMessage('Student information saved successfully!');
-    setStudentData({ name: '', enrollmentNumber: '', address: '', parentsName: '', phoneNumber: '', roomNumber: '', studentImage: null });
-    setImagePreview('');
-    setTimeout(() => setSuccessMessage(''), 3000);
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <h1 className="text-3xl font-bold mb-6">Student Information Management</h1>
+    <div className="min-h-screen bg-gray-100 p-6 flex justify-center items-start">
+      <div className="bg-white p-8 rounded-xl shadow-md w-full max-w-lg mt-10">
+        <h1 className="text-2xl font-bold text-blue-800 mb-6 text-center">Add Student Details</h1>
 
-      {successMessage && <p className="bg-green-100 text-green-700 p-2 rounded mb-4">{successMessage}</p>}
-      {formError && <p className="bg-red-100 text-red-700 p-2 rounded mb-4">{formError}</p>}
+        <input
+          type="text"
+          name="name"
+          placeholder="Student Name"
+          className="w-full border p-3 rounded mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          value={studentData.name}
+          onChange={handleChange}
+        />
 
-      <div className="bg-white p-6 rounded shadow-md grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="md:col-span-2">
-          <label className="block text-sm font-medium mb-2">Student Image</label>
-          <div className="flex items-center gap-4">
-            <div className="w-24 h-24 bg-gray-100 rounded-lg flex items-center justify-center border-2 border-dashed">
-              {imagePreview ? <img src={imagePreview} alt="preview" className="w-24 h-24 object-cover rounded-lg" /> : <UserPlus className="w-8 h-8 text-gray-400" />}
-            </div>
-            <label className="cursor-pointer bg-blue-50 text-blue-600 px-4 py-2 rounded flex items-center gap-2">
-              <Upload className="w-5 h-5" /> Upload
-              <input type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
-            </label>
-          </div>
-        </div>
+        <input
+          type="text"
+          name="enrollment"
+          placeholder="Enrollment Number"
+          className="w-full border p-3 rounded mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          value={studentData.enrollment}
+          onChange={handleChange}
+        />
 
-        <div>
-          <label className="block text-sm mb-2">Student Name</label>
-          <input name="name" value={studentData.name} onChange={handleInputChange} className="w-full border p-2 rounded" />
-        </div>
+        <input
+          type="text"
+          name="address"
+          placeholder="Address"
+          className="w-full border p-3 rounded mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          value={studentData.address}
+          onChange={handleChange}
+        />
 
-        <div>
-          <label className="block text-sm mb-2">Enrollment Number</label>
-          <input name="enrollmentNumber" value={studentData.enrollmentNumber} onChange={handleInputChange} className="w-full border p-2 rounded" />
-        </div>
+        <input
+          type="text"
+          name="roomNumber"
+          placeholder="Room Number"
+          className="w-full border p-3 rounded mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          value={studentData.roomNumber}
+          onChange={handleChange}
+        />
 
-        <div>
-          <label className="block text-sm mb-2">Parent Name</label>
-          <input name="parentsName" value={studentData.parentsName} onChange={handleInputChange} className="w-full border p-2 rounded" />
-        </div>
+        <input
+          type="text"
+          name="fatherName"
+          placeholder="Father's Name"
+          className="w-full border p-3 rounded mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          value={studentData.fatherName}
+          onChange={handleChange}
+        />
 
-        <div>
-          <label className="block text-sm mb-2">Phone Number</label>
-          <input name="phoneNumber" value={studentData.phoneNumber} onChange={handleInputChange} className="w-full border p-2 rounded" />
-        </div>
+        <input
+          type="text"
+          name="phoneNumber"
+          placeholder="Phone Number"
+          className="w-full border p-3 rounded mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          value={studentData.phoneNumber}
+          onChange={handleChange}
+        />
 
-        <div>
-          <label className="block text-sm mb-2">Room Number</label>
-          <input name="roomNumber" value={studentData.roomNumber} onChange={handleInputChange} className="w-full border p-2 rounded" />
-        </div>
+        <button
+          className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition duration-200"
+          onClick={handleAddStudent}
+        >
+          Add Student
+        </button>
 
-        <div className="md:col-span-2">
-          <label className="block text-sm mb-2">Address</label>
-          <textarea name="address" value={studentData.address} onChange={handleInputChange} className="w-full border p-2 rounded" rows="3"></textarea>
-        </div>
+        <button
+          className="w-full mt-4 text-blue-600 hover:underline"
+          onClick={() => navigate("/warden-portal")}
+        >
+          Go to Manage Students Portal
+        </button>
       </div>
-
-      <button
-        onClick={handleSubmitStudent}
-        className="mt-4 bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-      >
-        Save Student
-      </button>
     </div>
   );
 }

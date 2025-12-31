@@ -12,11 +12,15 @@ export default function UserSelect() {
   };
 
   return (
-    <div style={{ height: "100vh", display: "flex", justifyContent: "center", alignItems: "center" }}>
-      <div style={{ padding: "20px", border: "1px solid #ccc", borderRadius: "8px" }}>
-        <h2>Select User Type</h2>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-200">
+      <div className="bg-white p-10 rounded-xl shadow-lg w-80 text-center">
+        <h2 className="text-2xl font-bold text-blue-800 mb-6">Select User Type</h2>
 
-        <select onChange={handleChange} defaultValue="">
+        <select
+          onChange={handleChange}
+          defaultValue=""
+          className="w-full py-2 px-4 border border-blue-300 rounded-lg text-blue-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-500"
+        >
           <option value="" disabled>
             -- Choose Role --
           </option>
