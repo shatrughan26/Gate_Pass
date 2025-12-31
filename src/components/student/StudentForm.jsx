@@ -1,4 +1,4 @@
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom"; // added useNavigate
 import { useState } from "react";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -7,6 +7,7 @@ export default function StudentForm() {
   const [params] = useSearchParams();
   const passType = params.get("type"); // home | local
 
+  const navigate = useNavigate(); // initialize navigation
   const [submitted, setSubmitted] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -34,17 +35,24 @@ export default function StudentForm() {
       phone: "9876543210",
       place: "Gurgaon",
       parentName: passType === "home" ? "Rajesh Sharma" : "",
-      address:
-        passType === "home"
-          ? "12, Sector 45, Gurgaon, Haryana"
-          : "",
+      address: passType === "home" ? "12, Sector 45, Gurgaon, Haryana" : "",
     });
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    console.log("Submitted Data:", { ...formData, passType });
+    const submissionData = { ...formData, passType, submittedAt: new Date() };
+
+    console.log("Submitted Data:", submissionData);
+
+    // Store data in localStorage
+    const pastRequests =
+      JSON.parse(localStorage.getItem("studentPasses")) || [];
+    localStorage.setItem(
+      "studentPasses",
+      JSON.stringify([...pastRequests, submissionData])
+    );
 
     setSubmitted(true);
 
@@ -53,6 +61,11 @@ export default function StudentForm() {
       autoClose: 3000,
       theme: "colored",
     });
+
+    // Redirect after short delay
+    setTimeout(() => {
+      navigate("/student-dashboard");
+    }, 1500);
   };
 
   return (
@@ -61,7 +74,6 @@ export default function StudentForm() {
 
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex justify-center items-start p-6">
         <div className="w-full max-w-xl bg-white rounded-2xl shadow-xl overflow-hidden mt-8">
-
           {/* Header */}
           <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-6 text-center">
             <h1 className="text-2xl font-bold text-white">
@@ -76,7 +88,6 @@ export default function StudentForm() {
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="p-8 space-y-5">
-
             {/* Demo Button */}
             <button
               type="button"
@@ -87,12 +98,48 @@ export default function StudentForm() {
               Autofill Demo Data
             </button>
 
-            <Input label="Student Name" name="name" value={formData.name} onChange={handleChange} disabled={submitted} />
-            <Input label="Enrollment Number" name="enrollment" value={formData.enrollment} onChange={handleChange} disabled={submitted} />
-            <Input label="Course" name="course" value={formData.course} onChange={handleChange} disabled={submitted} />
-            <Input label="Room Number" name="room" value={formData.room} onChange={handleChange} disabled={submitted} />
-            <Input label="Phone Number" name="phone" value={formData.phone} onChange={handleChange} disabled={submitted} />
-            <Input label="Place Going To" name="place" value={formData.place} onChange={handleChange} disabled={submitted} />
+            <Input
+              label="Student Name"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              disabled={submitted}
+            />
+            <Input
+              label="Enrollment Number"
+              name="enrollment"
+              value={formData.enrollment}
+              onChange={handleChange}
+              disabled={submitted}
+            />
+            <Input
+              label="Course"
+              name="course"
+              value={formData.course}
+              onChange={handleChange}
+              disabled={submitted}
+            />
+            <Input
+              label="Room Number"
+              name="room"
+              value={formData.room}
+              onChange={handleChange}
+              disabled={submitted}
+            />
+            <Input
+              label="Phone Number"
+              name="phone"
+              value={formData.phone}
+              onChange={handleChange}
+              disabled={submitted}
+            />
+            <Input
+              label="Place Going To"
+              name="place"
+              value={formData.place}
+              onChange={handleChange}
+              disabled={submitted}
+            />
 
             {/* Home Pass Extra Fields */}
             {passType === "home" && (
