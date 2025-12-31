@@ -1,92 +1,82 @@
 // src/components/warden/WardenDashboard.jsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+
 
 export default function WardenDashboard() {
   const navigate = useNavigate();
   const [students, setStudents] = useState([]);
-  const [studentName, setStudentName] = useState("");
-  const [studentEnrollment, setStudentEnrollment] = useState("");
+  const [search, setSearch] = useState("");
 
-  const handleAddStudent = () => {
-    if (studentName && studentEnrollment) {
-      setStudents([...students, { name: studentName, enrollment: studentEnrollment }]);
-      setStudentName("");
-      setStudentEnrollment("");
-    }
-  };
+  // Fetch students from backend using fetch (no axios required)
+  useEffect(() => {
+    const fetchStudents = async () => {
+      try {
+        const res = await fetch("/api/students"); // replace with your API endpoint
+        if (!res.ok) throw new Error(`Fetch failed: ${res.status}`);
+        const data = await res.json();
+        setStudents(data);
+      } catch (error) {
+        console.error("Error fetching students:", error);
+      }
+    };
 
-  const handleDeleteStudent = (enrollment) => {
-    setStudents(students.filter((s) => s.enrollment !== enrollment));
-  };
+    fetchStudents();
+  }, []);
+
+  // Derive filtered students without calling setState in an effect
+  const filteredStudents = (
+    search === ""
+      ? students
+      : students.filter((s) => s.enrollment.toLowerCase().includes(search.toLowerCase()))
+  );
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Warden Dashboard</h1>
-        <button
-          onClick={() => navigate("/warden-portal")}
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-        >
-          Manage Students
-        </button>
-      </div>
+    <div className="min-h-screen bg-blue-50 p-6">
+      <div className="max-w-4xl mx-auto">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-bold text-blue-800">Warden Dashboard</h1>
 
-      <div className="bg-white p-6 rounded shadow-md mb-8">
-        <h2 className="text-xl font-semibold mb-4">Add Student</h2>
-        <input
-          type="text"
-          placeholder="Student Name"
-          className="border p-2 rounded mr-2"
-          value={studentName}
-          onChange={(e) => setStudentName(e.target.value)}
-        />
-        <input
-          type="text"
-          placeholder="Enrollment Number"
-          className="border p-2 rounded mr-2"
-          value={studentEnrollment}
-          onChange={(e) => setStudentEnrollment(e.target.value)}
-        />
-        <button
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-          onClick={handleAddStudent}
-        >
-          Add
-        </button>
-      </div>
+          {/* Add Student Button */}
+          <button
+            onClick={() => navigate("/student-info")} // redirect to StudentInfo component
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition duration-200"
+          >
+            Add Student
+          </button>
+        </div>
 
-      <div className="bg-white p-6 rounded shadow-md">
-        <h2 className="text-xl font-semibold mb-4">Student List</h2>
-        {students.length === 0 ? (
-          <p>No students added yet.</p>
-        ) : (
-          <table className="w-full border-collapse">
-            <thead>
-              <tr>
-                <th className="border p-2 text-left">Name</th>
-                <th className="border p-2 text-left">Enrollment</th>
-                <th className="border p-2">Action</th>
-              </tr>
-            </thead>
-            <tbody>
-              {students.map((student) => (
-                <tr key={student.enrollment}>
-                  <td className="border p-2">{student.name}</td>
-                  <td className="border p-2">{student.enrollment}</td>
-                  <td className="border p-2 text-center">
-                    <button
-                      className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
-                      onClick={() => handleDeleteStudent(student.enrollment)}
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+        {/* Search Bar */}
+        <div className="mb-6 flex justify-center">
+          <input
+            type="text"
+            placeholder="Search by Enrollment Number"
+            className="w-full max-w-md border p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
+
+        {/* Student Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {filteredStudents.length === 0 ? (
+            <p className="text-center text-gray-500 col-span-full">No students found.</p>
+          ) : (
+            filteredStudents.map((student) => (
+              <div
+                key={student.enrollment}
+                className="bg-white p-6 rounded-xl shadow-md border border-blue-100"
+              >
+                <h2 className="text-xl font-semibold text-blue-800 mb-2">{student.name}</h2>
+                <p className="text-gray-700"><span className="font-semibold">Enrollment:</span> {student.enrollment}</p>
+                <p className="text-gray-700"><span className="font-semibold">Address:</span> {student.address}</p>
+                <p className="text-gray-700"><span className="font-semibold">Room Number:</span> {student.roomNumber}</p>
+                <p className="text-gray-700"><span className="font-semibold">Father's Name:</span> {student.fatherName}</p>
+                <p className="text-gray-700"><span className="font-semibold">Phone:</span> {student.phoneNumber}</p>
+              </div>
+            ))
+          )}
+        </div>
       </div>
     </div>
   );

@@ -2,26 +2,39 @@
 import { useState } from 'react';
 import { Lock, User, Eye, EyeOff } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { signIn, getUserRole } from '../../firebase/auth';
 
 export default function WardenLogin() {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     setError('');
-    if (!username || !password) {
+    if (!email || !password) {
       setError('Please fill in all fields');
       return;
     }
 
-    // Demo login
-    if (username === 'warden' && password === 'warden123') {
+    try {
+      const cred = await signIn(email, password);
+      // optional: verify role from users collection
+      const role = await getUserRole(cred.user.uid);
+      if (role && role !== 'warden') {
+        setError('This account is not registered as a warden');
+        return;
+      }
+
       navigate('/warden-dashboard');
-    } else {
-      setError('Invalid username or password');
+    } catch (err) {
+      // Friendly message for missing Firebase configuration
+      if (err && (err.code === 'auth/configuration-not-found' || String(err.message).toLowerCase().includes('configuration'))) {
+        setError('Firebase configuration not found. Check `.env.local` (copy `.env.example`) and restart the dev server.');
+      } else {
+        setError(err.message || 'Login failed');
+      }
     }
   };
 
@@ -43,18 +56,18 @@ export default function WardenLogin() {
 
           <div className="px-8 py-10 space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Username</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <User className="h-5 w-5 text-gray-400" />
                 </div>
                 <input
-                  type="text"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   onKeyPress={handleKeyPress}
                   className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter username"
+                  placeholder="warden@example.com"
                 />
               </div>
             </div>
@@ -92,7 +105,7 @@ export default function WardenLogin() {
               Sign In
             </button>
 
-            <p className="text-xs text-center text-gray-500">Demo: warden / warden123</p>
+            <p className="text-xs text-center text-gray-500">Demo: warden@example.com / warden123 (create via Firebase Console or use `createUser` helper)</p>
           </div>
         </div>
       </div>
