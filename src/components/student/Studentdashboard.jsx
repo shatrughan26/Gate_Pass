@@ -4,7 +4,7 @@ import QRCode from "react-qr-code";
 export default function StudentDashboard() {
   const [activeTab, setActiveTab] = useState("home");
   const [studentPasses, setStudentPasses] = useState([]);
-  const [imageDB, setImageDB] = useState({}); // enrollment -> image Base64
+  const [imageDB, setImageDB] = useState({});
   const [selectedImage, setSelectedImage] = useState(null);
 
   useEffect(() => {
@@ -14,20 +14,16 @@ export default function StudentDashboard() {
     setImageDB(imgDB);
 
     // Simulate Warden approval for pending requests
-    const updatedPasses = passes.map((pass) => {
+    passes.forEach((pass, idx) => {
       if (!pass.status || pass.status === "Pending") {
-        // Randomly approve or reject after 2 seconds
         setTimeout(() => {
           const status = Math.random() > 0.5 ? "Approved" : "Rejected";
-          pass.status = status;
-          localStorage.setItem(
-            "studentPasses",
-            JSON.stringify([...passes])
-          );
+          const approvalTime = new Date().toISOString();
+          passes[idx] = { ...pass, status, approvedAt: approvalTime };
+          localStorage.setItem("studentPasses", JSON.stringify([...passes]));
           setStudentPasses([...passes]);
         }, 2000); // simulate delay
       }
-      return pass;
     });
   }, []);
 
@@ -40,12 +36,9 @@ export default function StudentDashboard() {
     const reader = new FileReader();
     reader.onloadend = () => {
       const base64 = reader.result;
-
-      // Save in imageDB using enrollment as key
       const updatedDB = { ...imageDB, [latestPass.enrollment]: base64 };
       setImageDB(updatedDB);
       localStorage.setItem("studentImages", JSON.stringify(updatedDB));
-
       setSelectedImage(base64);
     };
     reader.readAsDataURL(file);
@@ -136,6 +129,12 @@ export default function StudentDashboard() {
                   <strong>Status:</strong>{" "}
                   {latestPass.status || "Pending"}
                 </li>
+                {latestPass.approvedAt && (
+                  <li>
+                    <strong>Approved At:</strong>{" "}
+                    {new Date(latestPass.approvedAt).toLocaleString()}
+                  </li>
+                )}
               </ul>
             </div>
           )}
@@ -155,11 +154,13 @@ export default function StudentDashboard() {
             </div>
           )}
 
-          {activeTab === "qr" && latestPass && latestPass.status !== "Approved" && (
-            <p className="text-gray-600 text-center mt-4">
-              QR Code will be available once Warden approves your pass.
-            </p>
-          )}
+          {activeTab === "qr" &&
+            latestPass &&
+            latestPass.status !== "Approved" && (
+              <p className="text-gray-600 text-center mt-4">
+                QR Code will be available once Warden approves your pass.
+              </p>
+            )}
 
           {/* Past Requests Tab */}
           {activeTab === "past" && (
@@ -171,7 +172,8 @@ export default function StudentDashboard() {
                 <table className="w-full table-auto border border-gray-200 rounded-lg">
                   <thead>
                     <tr className="bg-indigo-100 text-indigo-700">
-                      <th className="border px-4 py-2">Date</th>
+                      <th className="border px-4 py-2">Submission Time</th>
+                      <th className="border px-4 py-2">Approval Time</th>
                       <th className="border px-4 py-2">Pass Type</th>
                       <th className="border px-4 py-2">Status</th>
                     </tr>
@@ -189,7 +191,12 @@ export default function StudentDashboard() {
                         } hover:bg-gray-100 transition`}
                       >
                         <td className="border px-4 py-2">
-                          {new Date(req.submittedAt).toLocaleDateString()}
+                          {new Date(req.submittedAt).toLocaleString()}
+                        </td>
+                        <td className="border px-4 py-2">
+                          {req.approvedAt
+                            ? new Date(req.approvedAt).toLocaleString()
+                            : "-"}
                         </td>
                         <td className="border px-4 py-2">{req.passType}</td>
                         <td
