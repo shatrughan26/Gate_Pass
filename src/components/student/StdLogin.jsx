@@ -4,15 +4,26 @@ import asuLogo from "../../assets/asu-logo.png";
 
 export default function StudentLogin() {
   const [enrollment, setEnrollment] = useState("");
+  const [error, setError] = useState("");
   const navigate = useNavigate();
+
+  const DEMO_ENROLLMENT = "ASU2023001";
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    setError("");
 
-    console.log("Enrollment Number:", enrollment);
+    if (!enrollment) {
+      setError("Please enter enrollment number");
+      return;
+    }
 
-    // Navigate to pass selection page
-    navigate("/student/pass-type");
+    // Demo login check
+    if (enrollment === DEMO_ENROLLMENT) {
+      navigate("/student/pass-type");
+    } else {
+      setError("Invalid enrollment number (use demo ID)");
+    }
   };
 
   return (
@@ -29,13 +40,13 @@ export default function StudentLogin() {
             />
           </div>
 
-          {/* University Name */}
+          {/* Title */}
           <div className="text-center mb-2">
             <h1 className="text-2xl font-bold text-gray-800">
               Apeejay Stya University
             </h1>
             <h2 className="text-lg text-gray-600 mt-1">
-              Hostel Pass
+              Hostel & Home Pass
             </h2>
           </div>
 
@@ -43,34 +54,34 @@ export default function StudentLogin() {
 
           {/* Login Form */}
           <form onSubmit={handleSubmit}>
-            <div className="mb-6">
-              <label
-                htmlFor="enrollment"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Enrollment Number
               </label>
               <input
                 type="text"
-                id="enrollment"
                 value={enrollment}
                 onChange={(e) => setEnrollment(e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
-                placeholder="Enter your enrollment number"
-                required
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                placeholder="Enter enrollment number"
               />
             </div>
 
+            {error && (
+              <p className="text-red-600 text-sm mb-4">{error}</p>
+            )}
+
             <button
               type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition duration-200 shadow-md hover:shadow-lg"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg shadow-md"
             >
               Login
             </button>
           </form>
 
-          <p className="text-center text-sm text-gray-500 mt-6">
-            Need help? Contact hostel administration
+          {/* Demo hint */}
+          <p className="text-center text-xs text-gray-500 mt-4">
+            Demo Enrollment: <span className="font-semibold">ASU2023001</span>
           </p>
 
         </div>
