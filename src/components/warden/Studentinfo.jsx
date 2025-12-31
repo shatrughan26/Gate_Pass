@@ -1,6 +1,8 @@
-// src/components/warden/WardenDashboard.jsx
+// src/components/warden/StudentInfo.jsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { db } from "../../firebase/firebase"; // adjust path
+import { doc, setDoc } from "firebase/firestore";
 
 export default function StudentInfo() {
   const navigate = useNavigate();
@@ -13,16 +15,28 @@ export default function StudentInfo() {
     phoneNumber: "",
   });
 
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState({ text: "", type: "" }); // type: success/error
+
   const handleChange = (e) => {
     setStudentData({ ...studentData, [e.target.name]: e.target.value });
   };
 
-  const handleAddStudent = () => {
+  const handleAddStudent = async () => {
     const { name, enrollment, address, roomNumber, fatherName, phoneNumber } = studentData;
 
-    if (name && enrollment && address && roomNumber && fatherName && phoneNumber) {
-      // Placeholder for backend API call
-      console.log("Student added:", studentData);
+    if (!name || !enrollment || !address || !roomNumber || !fatherName || !phoneNumber) {
+      setMessage({ text: "Please fill all fields!", type: "error" });
+      return;
+    }
+
+    setLoading(true);
+    setMessage({ text: "", type: "" });
+
+    try {
+      // Save student in Firestore using enrollment as document ID
+      await setDoc(doc(db, "students", enrollment), studentData);
+      setMessage({ text: "Student added successfully!", type: "success" });
 
       // Reset form
       setStudentData({
@@ -33,15 +47,28 @@ export default function StudentInfo() {
         fatherName: "",
         phoneNumber: "",
       });
-    } else {
-      alert("Please fill all fields!");
+    } catch (error) {
+      console.error("Error adding student:", error);
+      setMessage({ text: "Failed to add student. Check console for details.", type: "error" });
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6 flex justify-center items-start">
+    <div className="min-h-screen bg-blue-50 flex justify-center items-start p-6">
       <div className="bg-white p-8 rounded-xl shadow-md w-full max-w-lg mt-10">
         <h1 className="text-2xl font-bold text-blue-800 mb-6 text-center">Add Student Details</h1>
+
+        {message.text && (
+          <p
+            className={`mb-4 text-center font-semibold ${
+              message.type === "success" ? "text-green-600" : "text-red-600"
+            }`}
+          >
+            {message.text}
+          </p>
+        )}
 
         <input
           type="text"
@@ -89,7 +116,7 @@ export default function StudentInfo() {
         />
 
         <input
-          type="text"
+          type="tel"
           name="phoneNumber"
           placeholder="Phone Number"
           className="w-full border p-3 rounded mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400"
@@ -98,10 +125,13 @@ export default function StudentInfo() {
         />
 
         <button
-          className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition duration-200"
+          className={`w-full py-3 rounded-lg text-white ${
+            loading ? "bg-blue-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
+          } transition duration-200`}
           onClick={handleAddStudent}
+          disabled={loading}
         >
-          Add Student
+          {loading ? "Adding..." : "Add Student"}
         </button>
 
         <button
