@@ -13,7 +13,6 @@ import StudentDetails from "./components/security-guard/StudentDetails.jsx";
 import GuardExitSuccess from "./components/security-guard/GuardExitSuccess.jsx";
 import StudentLogin from "./components/student/StdLogin"; // make sure this exists
 import UserSelect from "./components/Userselect.jsx";
-import PassType from "./components/student/PassType.jsx";
 import StudentForm from "./components/student/StudentForm.jsx";
 
 function App() {
@@ -31,7 +30,6 @@ function App() {
         {/* Student Routes */}
         <Route path="/student/login" element={<StudentLogin />} />
         <Route path="/" element={<StudentLogin />} />
-        <Route path="/student/pass-type" element={<PassType />} />
         <Route path="/student/form" element={<StudentForm />} />
 
         {/* Guard Routes */}
