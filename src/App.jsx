@@ -7,13 +7,14 @@ import GuardScanner from "./components/security-guard/Scanner.jsx";
 import StudentDetails from "./components/security-guard/StudentDetails.jsx";
 import GuardExitSuccess from "./components/security-guard/GuardExitSuccess.jsx";
 import StudentLogin from "./components/student/StdLogin"; // make sure this exists
+import UserSelect from "./components/Userselect.jsx";
 
 function App() {
   return (
     <Router>
       <Routes>
-        {/* Default redirect */}
-        <Route path="/" element={<Navigate to="/login" />} />
+        {/* Default page */}
+        <Route path="/" element={<UserSelect />} />
 
         {/* Warden Routes */}
         <Route path="/login" element={<WardenLogin />} />
@@ -30,7 +31,7 @@ function App() {
         <Route path="/guard/success" element={<GuardExitSuccess />} />
 
         {/* Catch-all redirect */}
-        <Route path="*" element={<Navigate to="/login" />} />
+        <Route path="*" element={<Navigate to="/" />} />
       </Routes>
     </Router>
   );

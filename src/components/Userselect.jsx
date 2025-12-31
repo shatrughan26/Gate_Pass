@@ -6,9 +6,9 @@ export default function UserSelect() {
   const handleChange = (e) => {
     const role = e.target.value;
 
-    if (role === "student") navigate("/student-login");
-    if (role === "warden") navigate("/warden-login");
-    if (role === "guard") navigate("/guard-login");
+    if (role === "student") navigate("/student/login");
+    if (role === "warden") navigate("/login");
+    if (role === "guard") navigate("/guard/login");
   };
 
   return (
