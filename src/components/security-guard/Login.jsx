@@ -1,96 +1,140 @@
+// src/components/guard/GuardLogin.jsx
 import { useState } from "react";
+import { Lock, User, Eye, EyeOff } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import asuLogo from "../../assets/asu-logo.png";
+import { signIn, getUserRole } from "../../firebase/auth";
 
 export default function GuardLogin() {
-  const navigate = useNavigate();
-  const [guardId, setGuardId] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
 
-  const handleLogin = (e) => {
-    e.preventDefault();
+  const handleSubmit = async () => {
+    setError("");
 
-    // Frontend-only mock login
-    if (guardId && password) {
-      navigate("/guard/scan");
+    if (!email || !password) {
+      setError("Please fill in all fields");
+      return;
     }
+
+    try {
+      const cred = await signIn(email, password);
+
+      // 🔐 Verify role from Firestore (same as Warden)
+      const role = await getUserRole(cred.user.uid);
+
+      if (role && role !== "guard") {
+        setError("This account is not registered as a guard");
+        return;
+      }
+
+      navigate("/guard/scan");
+    } catch (err) {
+      if (
+        err &&
+        (err.code === "auth/configuration-not-found" ||
+          String(err.message).toLowerCase().includes("configuration"))
+      ) {
+        setError(
+          "Firebase configuration not found. Check `.env.local` and restart the dev server."
+        );
+      } else {
+        setError(err.message || "Login failed");
+      }
+    }
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === "Enter") handleSubmit();
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        <div className="bg-white rounded-lg shadow-xl p-8">
+        <div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
 
-          {/* University Logo */}
-          <div className="flex justify-center mb-6">
-            <img
-              src={asuLogo}
-              alt="Apeejay Stya University Logo"
-              className="w-24 h-24 object-contain rounded-full shadow-md"
-            />
-          </div>
-
-          {/* Title */}
-          <div className="text-center mb-2">
-            <h1 className="text-2xl font-bold text-gray-800">
-              Apeejay Stya University
-            </h1>
-            <h2 className="text-lg text-gray-600 mt-1">
-              Security Guard Login
-            </h2>
-          </div>
-
-          <div className="border-t border-gray-200 my-6"></div>
-
-          {/* Login Form */}
-          <form onSubmit={handleLogin}>
-            <div className="mb-5">
-              <label
-                htmlFor="guardId"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
-                Guard ID
-              </label>
-              <input
-                type="text"
-                id="guardId"
-                value={guardId}
-                onChange={(e) => setGuardId(e.target.value)}
-                placeholder="Enter your guard ID"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
-                required
+          {/* Header */}
+          <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-8 py-10 text-center">
+            <div className="flex justify-center mb-4">
+              <img
+                src={asuLogo}
+                alt="Apeejay Stya University Logo"
+                className="w-20 h-20 object-contain bg-white rounded-full p-2 shadow-lg"
               />
             </div>
+            <h1 className="text-3xl font-bold text-white mb-2">
+              Guard Portal
+            </h1>
+            <p className="text-blue-100">Secure Access System</p>
+          </div>
 
-            <div className="mb-6">
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-gray-700 mb-2"
-              >
+          {/* Form */}
+          <div className="px-8 py-10 space-y-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Email
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <User className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  className="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  placeholder="guard@example.com"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Password
               </label>
-              <input
-                type="password"
-                id="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
-                required
-              />
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Lock className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  className="block w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  placeholder="Enter password"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5 text-gray-400" />
+                  ) : (
+                    <Eye className="h-5 w-5 text-gray-400" />
+                  )}
+                </button>
+              </div>
             </div>
 
-            <button
-              type="submit"
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg transition duration-200 shadow-md hover:shadow-lg"
-            >
-              Login
-            </button>
-          </form>
+            {error && <p className="text-red-600">{error}</p>}
 
-          <p className="text-center text-sm text-gray-500 mt-6">
-            Authorized personnel only
-          </p>
+            <button
+              onClick={handleSubmit}
+              className="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-blue-800"
+            >
+              Sign In
+            </button>
+
+            <p className="text-xs text-center text-gray-500">
+              Demo: guard@example.com / asuguard123
+            </p>
+          </div>
         </div>
       </div>
     </div>
