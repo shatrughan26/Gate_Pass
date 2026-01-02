@@ -1,5 +1,7 @@
-import { useSearchParams, useNavigate } from "react-router-dom"; // added useNavigate
-import { useState } from "react";
+import { useSearchParams, useNavigate, useLocation } from "react-router-dom"; // added useNavigate & useLocation
+import { useState, useEffect } from "react";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../../firebase/firebase";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -8,11 +10,17 @@ export default function StudentForm() {
   const passType = params.get("type"); // home | local
 
   const navigate = useNavigate(); // initialize navigation
+  const location = useLocation();
+  const passedState = location.state || {};
+  const passedStudentData = passedState.studentData || null;
+  const passedEnrollment = passedState.enrollment || "";
+
   const [submitted, setSubmitted] = useState(false);
 
   const [formData, setFormData] = useState({
     name: "",
     enrollment: "",
+    branch: "",
     place: "",
     room: "",
     phone: "",
@@ -20,6 +28,71 @@ export default function StudentForm() {
     parentName: "",
     address: "",
   });
+
+  const [loading, setLoading] = useState(false);
+  const [fetchError, setFetchError] = useState("");
+
+  useEffect(() => {
+    // Try to autofill from navigation state first
+    if (passedStudentData) {
+      setFormData((prev) => ({
+        ...prev,
+        name: passedStudentData?.name || prev.name,
+        enrollment: passedStudentData?.enrollment || prev.enrollment,
+        branch: passedStudentData?.branch || passedStudentData?.course || prev.branch,
+        room: passedStudentData?.roomNumber || prev.room,
+        phone: passedStudentData?.phoneNumber || prev.phone,
+        course: passedStudentData?.course || prev.course,
+      }));
+      setFetchError("");
+      return;
+    }
+
+    // Otherwise, if enrollment is present (either via passed state or query param), fetch from Firestore
+    const enrollmentFromQuery = params.get("enrollment") || passedEnrollment || "";
+    if (!enrollmentFromQuery) return;
+
+    let mounted = true;
+    setLoading(true);
+    setFetchError("");
+
+    (async () => {
+      try {
+        const id = enrollmentFromQuery.trim();
+        const docRef = doc(db, "students", id);
+        const docSnap = await getDoc(docRef);
+
+        if (!mounted) return;
+
+        if (docSnap.exists()) {
+          const data = docSnap.data();
+          setFormData((prev) => ({
+            ...prev,
+            name: data.name || prev.name,
+            enrollment: id,
+            branch: data.branch || data.course || prev.branch,
+            room: data.roomNumber || prev.room,
+            phone: data.phoneNumber || prev.phone,
+            course: data.course || prev.course,
+          }));
+          setFetchError("");
+        } else {
+          setFetchError("Enrollment number not found in database.");
+        }
+      } catch (err) {
+        console.error(err);
+        setFetchError("Error fetching student data from database.");
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    })();
+
+    return () => {
+      mounted = false;
+    };
+  }, [passedStudentData, passedEnrollment, params]);
+
+  const readOnlyAutoFilled = Boolean(passedStudentData || passedEnrollment || formData.name);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -98,41 +171,58 @@ export default function StudentForm() {
               Autofill Demo Data
             </button>
 
+            {/* Loading / Fetch Error */}
+            {loading && (
+              <p className="text-sm text-gray-600">Fetching student data…</p>
+            )}
+            {fetchError && (
+              <p className="text-sm text-red-600">{fetchError}</p>
+            )}
+
             <Input
               label="Student Name"
               name="name"
               value={formData.name}
               onChange={handleChange}
-              disabled={submitted}
+              disabled={readOnlyAutoFilled || submitted}
             />
+
             <Input
               label="Enrollment Number"
               name="enrollment"
               value={formData.enrollment}
-              onChange={handleChange}
-              disabled={submitted}
+              onChange={(e) => setFormData({ ...formData, enrollment: e.target.value.toUpperCase() })}
+              disabled={readOnlyAutoFilled || submitted}
             />
+
             <Input
-              label="Course"
-              name="course"
-              value={formData.course}
+              label="Branch / Course"
+              name="branch"
+              value={formData.branch}
               onChange={handleChange}
-              disabled={submitted}
+              disabled={readOnlyAutoFilled || submitted}
             />
+
+
+
             <Input
               label="Room Number"
               name="room"
               value={formData.room}
               onChange={handleChange}
-              disabled={submitted}
+              disabled={true}
             />
+            <p className="text-xs text-gray-500 mt-1">Room number is assigned and cannot be changed.</p> 
+
             <Input
               label="Phone Number"
               name="phone"
               value={formData.phone}
               onChange={handleChange}
-              disabled={submitted}
+              disabled={true}
             />
+            <p className="text-xs text-gray-500 mt-1">Phone number is taken from records and cannot be edited.</p> 
+
             <Input
               label="Place Going To"
               name="place"
