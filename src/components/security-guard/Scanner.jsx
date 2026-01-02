@@ -31,7 +31,7 @@ const GuardScanner = () => {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex flex-col items-center justify-center px-4">
       <h2 className="text-2xl font-semibold mb-6">Scan Student QR</h2>
 
-      <div className="w-72 h-72 rounded-xl overflow-hidden shadow-lg bg-white flex items-center justify-center">
+      <div className="w-full max-w-xs h-64 sm:w-72 sm:h-72 rounded-xl overflow-hidden shadow-lg bg-white flex items-center justify-center">
         {/* STEP 1: Button before scanner */}
         {!startScan && !hasScanned && (
           <button

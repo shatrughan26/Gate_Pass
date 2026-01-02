@@ -13,7 +13,7 @@ export default function UserSelect() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-200">
-      <div className="bg-white p-10 rounded-xl shadow-lg w-80 text-center">
+      <div className="bg-white p-6 sm:p-10 rounded-xl shadow-lg w-full max-w-sm text-center">
         <h2 className="text-2xl font-bold text-blue-800 mb-6">Select User Type</h2>
 
         <select

@@ -3,17 +3,26 @@ import QRCode from "react-qr-code";
 
 export default function StudentDashboard() {
   const [activeTab, setActiveTab] = useState("home");
-  const [studentPasses, setStudentPasses] = useState([]);
-  const [imageDB, setImageDB] = useState({});
+  const [studentPasses, setStudentPasses] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("studentPasses")) || [];
+    } catch {
+      return [];
+    }
+  });
+  const [imageDB, setImageDB] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem("studentImages")) || {};
+    } catch {
+      return {};
+    }
+  });
   const [selectedImage, setSelectedImage] = useState(null);
 
   useEffect(() => {
-    const passes = JSON.parse(localStorage.getItem("studentPasses")) || [];
-    const imgDB = JSON.parse(localStorage.getItem("studentImages")) || {};
-    setStudentPasses(passes);
-    setImageDB(imgDB);
+    // Simulate Warden approval for pending requests (run once on mount)
+    const passes = [...studentPasses];
 
-    // Simulate Warden approval for pending requests
     passes.forEach((pass, idx) => {
       if (!pass.status || pass.status === "Pending") {
         setTimeout(() => {
@@ -25,11 +34,14 @@ export default function StudentDashboard() {
         }, 2000); // simulate delay
       }
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const latestPass = studentPasses[studentPasses.length - 1];
 
   const handleImageUpload = (e) => {
+    if (!latestPass) return; // guard against no pass
+
     const file = e.target.files[0];
     if (!file) return;
 

@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "../../firebase/firebase";
 import asuLogo from "../../assets/asu-logo.png";
 
 export default function StudentLogin() {
@@ -8,10 +10,9 @@ export default function StudentLogin() {
   const [enrollment, setEnrollment] = useState("");
   const [error, setError] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [studentData, setStudentData] = useState(null);
 
-  const DEMO_ENROLLMENT = "ASU2023001";
-
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
 
@@ -20,15 +21,26 @@ export default function StudentLogin() {
       return;
     }
 
-    if (enrollment === DEMO_ENROLLMENT) {
-      setIsLoggedIn(true);
-    } else {
-      setError("Invalid enrollment number (use demo ID)");
+    try {
+      const docRef = doc(db, "students", enrollment.trim());
+      const docSnap = await getDoc(docRef);
+
+      if (docSnap.exists()) {
+        setStudentData(docSnap.data()); // fetched data
+        setIsLoggedIn(true);
+      } else {
+        setError("Enrollment number not found");
+      }
+    } catch (err) {
+      console.error(err);
+      setError("Something went wrong while fetching data");
     }
   };
 
   const handlePassSelect = (type) => {
-    navigate(`/student/form?type=${type}`);
+    navigate(`/student/form?type=${type}`, {
+      state: { studentData },
+    });
   };
 
   return (
@@ -57,7 +69,7 @@ export default function StudentLogin() {
 
           <div className="border-t border-gray-200 my-6"></div>
 
-          {/* LOGIN PHASE */}
+          {/* FETCH PHASE */}
           {!isLoggedIn && (
             <form onSubmit={handleLogin}>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -67,31 +79,29 @@ export default function StudentLogin() {
               <input
                 type="text"
                 value={enrollment}
-                onChange={(e) => setEnrollment(e.target.value)}
+                onChange={(e) => setEnrollment(e.target.value.toUpperCase())}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 mb-4"
                 placeholder="Enter enrollment number"
               />
 
-              {error && <p className="text-red-600 text-sm mb-4">{error}</p>}
+              {error && (
+                <p className="text-red-600 text-sm mb-4">{error}</p>
+              )}
 
               <button
                 type="submit"
                 className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg shadow-md"
               >
-                Login
+                Fetch Student Data
               </button>
-
-              <p className="text-center text-xs text-gray-500 mt-4">
-                Demo Enrollment: <span className="font-semibold">ASU2023001</span>
-              </p>
             </form>
           )}
 
           {/* PASS TYPE PHASE */}
           {isLoggedIn && (
             <div className="space-y-4">
-              <h3 className="text-xl font-semibold text-center mb-4">
-                Select Pass Type
+              <h3 className="text-xl font-semibold text-center mb-2">
+                Welcome, {studentData?.name}
               </h3>
 
               <button

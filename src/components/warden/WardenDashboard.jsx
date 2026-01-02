@@ -42,7 +42,7 @@ export default function WardenDashboard() {
   return (
     <div className="min-h-screen bg-blue-50 p-6">
       <div className="max-w-4xl mx-auto">
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
           <h1 className="text-3xl font-bold text-blue-800">Warden Dashboard</h1>
 
           {/* Add Student Button */}
