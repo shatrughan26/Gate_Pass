@@ -187,6 +187,15 @@ export default function StudentForm() {
               {submitted ? "Submitted" : "Submit for Approval"}
             </button>
 
+            {/* Dashboard Shortcut */}
+            <button
+              type="button"
+              onClick={() => navigate("/student-dashboard")}
+              className="w-full mt-2 py-3 rounded-lg font-semibold bg-red-600 text-white hover:bg-red-700"
+            >
+              Go to Student Dashboard
+            </button>
+
             {/* Success Message */}
             {submitted && (
               <div className="mt-4 p-4 bg-green-50 border border-green-300 rounded-lg text-green-700 text-center">
