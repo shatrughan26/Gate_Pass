@@ -1,12 +1,11 @@
 // src/components/warden/StudentInfo.jsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { db } from "../../firebase/firebase";
+import { db } from "../../firebase/firebase"; // adjust path
 import { doc, setDoc } from "firebase/firestore";
 
 export default function StudentInfo() {
   const navigate = useNavigate();
-
   const [studentData, setStudentData] = useState({
     name: "",
     enrollment: "",
@@ -17,26 +16,16 @@ export default function StudentInfo() {
   });
 
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState({ text: "", type: "" });
+  const [message, setMessage] = useState({ text: "", type: "" }); // type: success/error
 
   const handleChange = (e) => {
     setStudentData({ ...studentData, [e.target.name]: e.target.value });
   };
 
-  const handleAddStudent = async (e) => {
-    e.preventDefault();
+  const handleAddStudent = async () => {
+    const { name, enrollment, address, roomNumber, fatherName, phoneNumber } = studentData;
 
-    const { name, enrollment, address, roomNumber, fatherName, phoneNumber } =
-      studentData;
-
-    if (
-      !name ||
-      !enrollment ||
-      !address ||
-      !roomNumber ||
-      !fatherName ||
-      !phoneNumber
-    ) {
+    if (!name || !enrollment || !address || !roomNumber || !fatherName || !phoneNumber) {
       setMessage({ text: "Please fill all fields!", type: "error" });
       return;
     }
@@ -45,9 +34,11 @@ export default function StudentInfo() {
     setMessage({ text: "", type: "" });
 
     try {
+      // Save student in Firestore using enrollment as document ID
       await setDoc(doc(db, "students", enrollment), studentData);
-      setMessage({ text: "Student added successfully ✅", type: "success" });
+      setMessage({ text: "Student added successfully!", type: "success" });
 
+      // Reset form
       setStudentData({
         name: "",
         enrollment: "",
@@ -57,104 +48,99 @@ export default function StudentInfo() {
         phoneNumber: "",
       });
     } catch (error) {
-      console.error(error);
-      setMessage({
-        text: "Failed to add student. Please try again.",
-        type: "error",
-      });
+      console.error("Error adding student:", error);
+      setMessage({ text: "Failed to add student. Check console for details.", type: "error" });
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex justify-center p-6">
-      <div className="w-full max-w-xl bg-white rounded-2xl shadow-xl mt-8">
+    <div className="min-h-screen bg-blue-50 flex justify-center items-start p-6">
+      <div className="bg-white p-8 rounded-xl shadow-md w-full max-w-lg mt-10">
+        <h1 className="text-2xl font-bold text-blue-800 mb-6 text-center">Add Student Details</h1>
 
-        {/* HEADER */}
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-6 text-center rounded-t-2xl">
-          <h1 className="text-2xl font-bold text-white">Add Student Details</h1>
-          <p className="text-blue-100 text-sm mt-1">
-            Enter student information carefully
+        {message.text && (
+          <p
+            className={`mb-4 text-center font-semibold ${
+              message.type === "success" ? "text-green-600" : "text-red-600"
+            }`}
+          >
+            {message.text}
           </p>
-        </div>
+        )}
 
-        {/* FORM */}
-        <form onSubmit={handleAddStudent} className="p-8 space-y-5">
+        <input
+          type="text"
+          name="name"
+          placeholder="Student Name"
+          className="w-full border p-3 rounded mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          value={studentData.name}
+          onChange={handleChange}
+        />
 
-          {message.text && (
-            <div
-              className={`p-3 rounded-lg text-center font-medium ${
-                message.type === "success"
-                  ? "bg-green-50 text-green-700 border border-green-300"
-                  : "bg-red-50 text-red-700 border border-red-300"
-              }`}
-            >
-              {message.text}
-            </div>
-          )}
+        <input
+          type="text"
+          name="enrollment"
+          placeholder="Enrollment Number"
+          className="w-full border p-3 rounded mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          value={studentData.enrollment}
+          onChange={handleChange}
+        />
 
-          <Input label="Student Name" name="name" value={studentData.name} onChange={handleChange} />
-          <Input label="Enrollment Number" name="enrollment" value={studentData.enrollment} onChange={handleChange} />
-          <Input label="Room Number" name="roomNumber" value={studentData.roomNumber} onChange={handleChange} />
-          <Input label="Father's Name" name="fatherName" value={studentData.fatherName} onChange={handleChange} />
-          <Input label="Phone Number" name="phoneNumber" value={studentData.phoneNumber} onChange={handleChange} />
+        <input
+          type="text"
+          name="address"
+          placeholder="Address"
+          className="w-full border p-3 rounded mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          value={studentData.address}
+          onChange={handleChange}
+        />
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Address
-            </label>
-            <textarea
-              name="address"
-              rows="3"
-              value={studentData.address}
-              onChange={handleChange}
-              className="w-full border px-4 py-3 rounded-lg focus:ring-2 focus:ring-blue-500"
-              required
-            />
-          </div>
+        <input
+          type="text"
+          name="roomNumber"
+          placeholder="Room Number"
+          className="w-full border p-3 rounded mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          value={studentData.roomNumber}
+          onChange={handleChange}
+        />
 
-          <button
-            type="submit"
-            disabled={loading}
-            className={`w-full py-3 rounded-lg font-semibold transition
-              ${
-                loading
-                  ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700"
-              }`}
-          >
-            {loading ? "Adding Student..." : "Add Student"}
-          </button>
+        <input
+          type="text"
+          name="fatherName"
+          placeholder="Father's Name"
+          className="w-full border p-3 rounded mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          value={studentData.fatherName}
+          onChange={handleChange}
+        />
 
-          {/* ✅ FIXED BACK BUTTON */}
-          <button
-            type="button"
-            onClick={() => navigate("/warden-dashboard")}
-            className="w-full text-blue-600 hover:underline text-sm"
-          >
-            ← Back to Warden Dashboard
-          </button>
-        </form>
+        <input
+          type="tel"
+          name="phoneNumber"
+          placeholder="Phone Number"
+          className="w-full border p-3 rounded mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400"
+          value={studentData.phoneNumber}
+          onChange={handleChange}
+        />
+
+        <button
+          className={`w-full py-3 rounded-lg text-white ${
+            loading ? "bg-blue-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
+          } transition duration-200`}
+          onClick={handleAddStudent}
+          disabled={loading}
+        >
+          {loading ? "Adding..." : "Add Student"}
+        </button>
+
+        <button
+          className="w-full mt-4 text-blue-600 hover:underline"
+          onClick={() => navigate("/warden-portal")}
+        >
+          Go to Manage Students Portal
+        </button>
       </div>
-    </div>
-  );
-}
-
-function Input({ label, name, value, onChange }) {
-  return (
-    <div>
-      <label className="block text-sm font-medium text-gray-700 mb-1">
-        {label}
-      </label>
-      <input
-        type="text"
-        name={name}
-        value={value}
-        onChange={onChange}
-        required
-        className="w-full border px-4 py-3 rounded-lg focus:ring-2 focus:ring-blue-500"
-      />
     </div>
   );
 }
