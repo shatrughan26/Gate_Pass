@@ -48,6 +48,17 @@ export default function StudentLogin() {
       <div className="w-full max-w-md">
         <div className="bg-white rounded-lg shadow-xl p-8">
 
+          <div className="mb-4">
+            <button
+              type="button"
+              onClick={() => navigate(-1)}
+              className="text-sm text-blue-600 hover:underline flex items-center gap-2"
+              aria-label="Go back"
+            >
+              ← Back
+            </button>
+          </div>
+
           {/* Logo */}
           <div className="flex justify-center mb-6">
             <img
