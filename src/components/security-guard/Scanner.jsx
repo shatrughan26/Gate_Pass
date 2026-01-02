@@ -4,11 +4,12 @@ import { Scanner } from "@yudiel/react-qr-scanner";
 
 const GuardScanner = () => {
   const navigate = useNavigate();
+
   const [scannedData, setScannedData] = useState(null);
   const [hasScanned, setHasScanned] = useState(false);
+  const [startScan, setStartScan] = useState(false); // 👈 NEW
 
   const handleScan = (result) => {
-    // Prevent multiple scans
     if (hasScanned) return;
 
     if (result?.[0]?.rawValue) {
@@ -16,8 +17,8 @@ const GuardScanner = () => {
 
       setScannedData(qrValue);
       setHasScanned(true);
+      setStartScan(false); // 👈 close camera
 
-      // Navigate AFTER short delay (better UX)
       setTimeout(() => {
         navigate("/guard/student", {
           state: { qrData: qrValue },
@@ -31,22 +32,36 @@ const GuardScanner = () => {
       <h2 className="text-2xl font-semibold mb-6">Scan Student QR</h2>
 
       <div className="w-72 h-72 rounded-xl overflow-hidden shadow-lg bg-white flex items-center justify-center">
-        {!hasScanned ? (
+        {/* STEP 1: Button before scanner */}
+        {!startScan && !hasScanned && (
+          <button
+            onClick={() => setStartScan(true)}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold transition"
+          >
+            Scan QR
+          </button>
+        )}
+
+        {/* STEP 2: Scanner opens */}
+        {startScan && !hasScanned && (
           <Scanner
             onScan={handleScan}
             onError={(error) => console.error(error)}
             constraints={{ facingMode: "environment" }}
           />
-        ) : (
+        )}
+
+        {/* STEP 3: Success message */}
+        {hasScanned && (
           <div className="text-green-600 font-semibold text-center">
             QR Scanned Successfully ✔
           </div>
         )}
       </div>
 
-      {!scannedData && (
+      {!scannedData && !startScan && (
         <p className="text-gray-500 mt-4 text-center">
-          Show the QR code on the student’s phone
+          Click “Scan QR” to open the camera
         </p>
       )}
 
