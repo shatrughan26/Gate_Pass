@@ -15,6 +15,7 @@ import StudentLogin from "./components/student/StdLogin"; // make sure this exis
 import UserSelect from "./components/Userselect.jsx";
 import StudentDashboard from "./components/student/Studentdashboard.jsx";
 import StudentForm from "./components/student/StudentForm.jsx";
+import EditStudent from "./components/warden/EditStudent";
 
 function App() {
   return (
@@ -28,11 +29,14 @@ function App() {
         <Route path="/warden-dashboard" element={<WardenDashboard />} />
         <Route path="/student-info" element={<WardenPortal />} />
 
+        <Route path="/edit-student/:enrollment" element={<EditStudent />} />
+        <Route path="/warden-dashboard" element={<WardenDashboard />} />
+
         {/* Student Routes */}
         <Route path="/student/login" element={<StudentLogin />} />
         <Route path="/" element={<StudentLogin />} />
         <Route path="/student/form" element={<StudentForm />} />
-         <Route path="/student-dashboard" element={<StudentDashboard />} />
+        <Route path="/student-dashboard" element={<StudentDashboard />} />
 
         {/* Guard Routes */}
         <Route path="/guard/login" element={<GuardLogin />} />
