@@ -38,8 +38,9 @@ export default function StudentLogin() {
   };
 
   const handlePassSelect = (type) => {
+    // pass both enrollment and studentData so StudentForm can autofill
     navigate(`/student/form?type=${type}`, {
-      state: { studentData },
+      state: { studentData, enrollment },
     });
   };
 
