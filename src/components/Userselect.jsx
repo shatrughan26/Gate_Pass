@@ -1,33 +1,49 @@
 import { useNavigate } from "react-router-dom";
+import { FaUserGraduate, FaUserShield, FaUserLock } from "react-icons/fa"; // Icons for student, warden, guard
 
 export default function UserSelect() {
   const navigate = useNavigate();
 
-  const handleChange = (e) => {
-    const role = e.target.value;
-
-    if (role === "student") navigate("/student/login");
-    if (role === "warden") navigate("/login");
-    if (role === "guard") navigate("/guard/login");
-  };
+  const roles = [
+    {
+      name: "Student",
+      value: "student",
+      color: "bg-green-400",
+      icon: <FaUserGraduate className="text-4xl text-white mb-2" />,
+      path: "/student/login",
+    },
+    {
+      name: "Warden",
+      value: "warden",
+      color: "bg-yellow-400",
+      icon: <FaUserShield className="text-4xl text-white mb-2" />,
+      path: "/login",
+    },
+    {
+      name: "Guard",
+      value: "guard",
+      color: "bg-purple-500",
+      icon: <FaUserLock className="text-4xl text-white mb-2" />,
+      path: "/guard/login",
+    },
+  ];
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-blue-200">
-      <div className="bg-white p-6 sm:p-10 rounded-xl shadow-lg w-full max-w-sm text-center">
-        <h2 className="text-2xl font-bold text-blue-800 mb-6">Select User Type</h2>
-
-        <select
-          onChange={handleChange}
-          defaultValue=""
-          className="w-full py-2 px-4 border border-blue-300 rounded-lg text-blue-700 font-medium focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-500"
-        >
-          <option value="" disabled>
-            -- Choose Role --
-          </option>
-          <option value="student">Student</option>
-          <option value="warden">Warden</option>
-          <option value="guard">Guard</option>
-        </select>
+      <div className="text-center">
+        <h2 className="text-3xl font-bold text-blue-800 mb-10">Select User Type</h2>
+        <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
+          {roles.map((role) => (
+            <div
+              key={role.value}
+              onClick={() => navigate(role.path)}
+              className={`cursor-pointer ${role.color} rounded-xl shadow-lg w-48 h-48 flex flex-col items-center justify-center transform transition hover:scale-105 hover:shadow-2xl`}
+            >
+              {role.icon}
+              <span className="text-white text-xl font-semibold">{role.name}</span>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
