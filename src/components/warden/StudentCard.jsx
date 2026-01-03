@@ -9,7 +9,9 @@ export default function StudentCard() {
   const [student, setStudent] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const imageDB = JSON.parse(localStorage.getItem("studentImages")) || {};
+  // 🔹 image state
+  const storedImages = JSON.parse(localStorage.getItem("studentImages")) || {};
+  const [image, setImage] = useState(storedImages[enrollment] || null);
 
   useEffect(() => {
     fetchStudent();
@@ -52,6 +54,25 @@ export default function StudentCard() {
     navigate(`/edit-student/${enrollment}`);
   };
 
+  /* 🔹 HANDLE IMAGE UPLOAD */
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const base64 = reader.result;
+
+      // Update local state
+      setImage(base64);
+
+      // Save to localStorage
+      const updatedImages = { ...storedImages, [enrollment]: base64 };
+      localStorage.setItem("studentImages", JSON.stringify(updatedImages));
+    };
+    reader.readAsDataURL(file);
+  };
+
   if (loading) {
     return <p className="text-center mt-10">Loading...</p>;
   }
@@ -71,20 +92,30 @@ export default function StudentCard() {
         </button>
 
         <div className="flex flex-col md:flex-row gap-8">
-          {/* IMAGE */}
-          <div className="w-40 h-52 rounded-xl overflow-hidden bg-gray-100 border">
-            {imageDB[enrollment] ? (
-              <img
-                src={imageDB[enrollment]}
-                alt="Student"
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="flex items-center justify-center h-full text-gray-400 text-sm">
-                No Image
-              </div>
-            )}
-          </div>
+         {/* IMAGE */}
+<div className="w-40 h-52 rounded-xl overflow-hidden bg-gray-100 border flex flex-col items-center justify-center relative">
+  {image ? (
+    <img
+      src={image}
+      alt="Student"
+      className="w-full h-full object-cover"
+    />
+  ) : (
+    <div className="flex flex-col items-center justify-center h-full w-full text-gray-500">
+      <span className="text-sm">Click to upload image</span>
+    </div>
+  )}
+
+  {/* 🔹 Hidden file input triggered by overlay */}
+  <input
+    type="file"
+    accept="image/*"
+    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+    onChange={handleImageUpload}
+  />
+</div>
+
+
 
           {/* DETAILS */}
           <div className="flex-1 space-y-2 text-gray-700">
