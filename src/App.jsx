@@ -17,6 +17,7 @@ import UserSelect from "./components/Userselect.jsx";
 import StudentDashboard from "./components/student/Studentdashboard.jsx";
 import StudentForm from "./components/student/StudentForm.jsx";
 import EditStudent from "./components/warden/EditStudent";
+import StudentCard from "./components/warden/StudentCard.jsx";
 
 function App() {
   return (
@@ -24,29 +25,26 @@ function App() {
       <Routes>
         {/* Default page */}
         <Route path="/" element={<UserSelect />} />
-
         {/* Warden Routes */}
         <Route path="/login" element={<WardenLogin />} />
         <Route path="/warden-dashboard" element={<WardenDashboard />} />
         <Route path="/student-info" element={<WardenPortal />} />
-
         <Route path="/edit-student/:enrollment" element={<EditStudent />} />
         <Route path="/warden-dashboard" element={<WardenDashboard />} />
         <Route path="/warden/requests" element={<StudentRequest />} />
         <Route path="/requests" element={<StudentRequest readOnly={true} />} />
+        <Route path="/student-details/:enrollment" element={<StudentCard />} />
 
         {/* Student Routes */}
         <Route path="/student/login" element={<StudentLogin />} />
         <Route path="/" element={<StudentLogin />} />
         <Route path="/student/form" element={<StudentForm />} />
         <Route path="/student-dashboard" element={<StudentDashboard />} />
-
         {/* Guard Routes */}
         <Route path="/guard/login" element={<GuardLogin />} />
         <Route path="/guard/scan" element={<GuardScanner />} />
         <Route path="/guard/student" element={<StudentDetails />} />
         <Route path="/guard/success" element={<GuardExitSuccess />} />
-
         {/* Catch-all redirect */}
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>

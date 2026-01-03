@@ -3,6 +3,8 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { db } from "../../firebase/firebase";
 import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function EditStudent() {
   const { enrollment } = useParams();
@@ -36,22 +38,33 @@ export default function EditStudent() {
     setStudentData({ ...studentData, [e.target.name]: e.target.value });
   };
 
-  const handleSave = async () => {
-    setLoading(true);
-    try {
-      await updateDoc(doc(db, "students", enrollment), studentData);
-      alert("Student updated successfully ✅");
+const handleSave = async () => {
+  setLoading(true);
+  try {
+    await updateDoc(doc(db, "students", enrollment), studentData);
+
+    toast.success("Student updated successfully ✅", {
+      position: "top-right",
+      autoClose: 3000,
+    });
+
+    setTimeout(() => {
       navigate("/warden-dashboard");
-    } catch (err) {
-      console.error(err);
-      alert("Failed to update student. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
+    }, 1500);
+  } catch (err) {
+    console.error(err);
+    toast.error("Failed to update student ❌", {
+      position: "top-right",
+    });
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex justify-center p-6">
+      <ToastContainer />
       <div className="w-full max-w-xl bg-white rounded-2xl shadow-xl mt-8">
         <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-6 text-center rounded-t-2xl">
           <h1 className="text-2xl font-bold text-white">Edit Student Details</h1>

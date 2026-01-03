@@ -23,9 +23,17 @@ export default function StudentInfo() {
   };
 
   const handleAddStudent = async () => {
-    const { name, enrollment, address, roomNumber, fatherName, phoneNumber } = studentData;
+    const { name, enrollment, address, roomNumber, fatherName, phoneNumber } =
+      studentData;
 
-    if (!name || !enrollment || !address || !roomNumber || !fatherName || !phoneNumber) {
+    if (
+      !name ||
+      !enrollment ||
+      !address ||
+      !roomNumber ||
+      !fatherName ||
+      !phoneNumber
+    ) {
       setMessage({ text: "Please fill all fields!", type: "error" });
       return;
     }
@@ -49,7 +57,10 @@ export default function StudentInfo() {
       });
     } catch (error) {
       console.error("Error adding student:", error);
-      setMessage({ text: "Failed to add student. Check console for details.", type: "error" });
+      setMessage({
+        text: "Failed to add student. Check console for details.",
+        type: "error",
+      });
     } finally {
       setLoading(false);
     }
@@ -58,7 +69,9 @@ export default function StudentInfo() {
   return (
     <div className="min-h-screen bg-blue-50 flex justify-center items-start p-6">
       <div className="bg-white p-8 rounded-xl shadow-md w-full max-w-lg mt-10">
-        <h1 className="text-2xl font-bold text-blue-800 mb-6 text-center">Add Student Details</h1>
+        <h1 className="text-2xl font-bold text-blue-800 mb-6 text-center">
+          Add Student Details
+        </h1>
 
         {message.text && (
           <p
@@ -126,7 +139,9 @@ export default function StudentInfo() {
 
         <button
           className={`w-full py-3 rounded-lg text-white ${
-            loading ? "bg-blue-400 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700"
+            loading
+              ? "bg-blue-400 cursor-not-allowed"
+              : "bg-blue-600 hover:bg-blue-700"
           } transition duration-200`}
           onClick={handleAddStudent}
           disabled={loading}
@@ -136,11 +151,13 @@ export default function StudentInfo() {
 
         <button
           className="w-full mt-4 text-blue-600 hover:underline"
-          onClick={() => navigate("/warden-portal")}
+          onClick={() => navigate("/warden-dashboard")}
         >
-          Go to Manage Students Portal
+          Go to Warden Dashboard
         </button>
       </div>
     </div>
   );
 }
+
+// add student deatils page is this one
