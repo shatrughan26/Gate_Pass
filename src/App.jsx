@@ -18,6 +18,9 @@ import StudentDashboard from "./components/student/Studentdashboard.jsx";
 import StudentForm from "./components/student/StudentForm.jsx";
 import EditStudent from "./components/warden/EditStudent";
 import StudentCard from "./components/warden/StudentCard.jsx";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 
 function App() {
   return (
