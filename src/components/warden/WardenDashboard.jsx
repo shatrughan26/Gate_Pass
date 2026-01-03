@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { db } from "../../firebase/firebase";
-import { collection, getDocs, deleteDoc, doc } from "firebase/firestore";
+import { collection, getDocs } from "firebase/firestore";
 
 export default function WardenDashboard() {
   const navigate = useNavigate();
@@ -11,14 +11,9 @@ export default function WardenDashboard() {
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
 
-  // Image DB (localStorage)
-  const [imageDB, setImageDB] = useState(() => {
-    try {
-      return JSON.parse(localStorage.getItem("studentImages")) || {};
-    } catch {
-      return {};
-    }
-  });
+  // 🔹 Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const STUDENTS_PER_PAGE = 50;
 
   useEffect(() => {
     fetchStudents();
@@ -39,38 +34,7 @@ export default function WardenDashboard() {
     }
   };
 
-  // IMAGE UPLOAD
-  const handleImageUpload = (e, enrollment) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const updated = { ...imageDB, [enrollment]: reader.result };
-      setImageDB(updated);
-      localStorage.setItem("studentImages", JSON.stringify(updated));
-    };
-    reader.readAsDataURL(file);
-  };
-
-  // DELETE
-  const handleDelete = async (enrollment) => {
-    if (!window.confirm("Delete this student?")) return;
-
-    try {
-      await deleteDoc(doc(db, "students", enrollment));
-
-      const updatedImages = { ...imageDB };
-      delete updatedImages[enrollment];
-      setImageDB(updatedImages);
-      localStorage.setItem("studentImages", JSON.stringify(updatedImages));
-
-      setStudents((prev) => prev.filter((s) => s.enrollment !== enrollment));
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
+  // 🔹 Filter students
   const filteredStudents =
     search === ""
       ? students
@@ -78,10 +42,22 @@ export default function WardenDashboard() {
           s.enrollment.toLowerCase().includes(search.toLowerCase())
         );
 
+  // 🔹 Pagination logic
+  const totalPages = Math.ceil(filteredStudents.length / STUDENTS_PER_PAGE);
+  const startIndex = (currentPage - 1) * STUDENTS_PER_PAGE;
+  const currentStudents = filteredStudents.slice(
+    startIndex,
+    startIndex + STUDENTS_PER_PAGE
+  );
+
+  // 🔹 Reset page when search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search]);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
       <div className="max-w-6xl mx-auto">
-        {/* MAIN CARD */}
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
           {/* HEADER */}
           <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-6 flex justify-between items-center">
@@ -107,90 +83,74 @@ export default function WardenDashboard() {
               />
             </div>
 
-            {/* STUDENTS */}
+            {/* STUDENT LIST */}
             {loading ? (
               <p className="text-center text-gray-500">Loading students...</p>
-            ) : filteredStudents.length === 0 ? (
+            ) : currentStudents.length === 0 ? (
               <p className="text-center text-gray-500">No students found.</p>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {filteredStudents.map((student) => (
+              <div className="grid gap-6 [grid-template-columns:repeat(auto-fit,minmax(220px,1fr))]">
+                {currentStudents.map((student) => (
                   <div
                     key={student.enrollment}
-                    className="bg-blue-50 rounded-xl p-6 shadow-sm hover:shadow-md transition flex justify-between items-center"
+                    onClick={() =>
+                      navigate(`/student-details/${student.enrollment}`)
+                    }
+                    className="cursor-pointer bg-blue-50 rounded-xl p-6 shadow-sm hover:shadow-lg hover:bg-blue-100 transition"
                   >
-                    {/* LEFT: DETAILS */}
-                    <div>
-                      <h2 className="text-xl font-semibold text-blue-800 mb-2">
-                        {student.name}
-                      </h2>
-                      <div className="space-y-1 text-sm text-gray-700">
-                        <p>
-                          <b>Enrollment:</b> {student.enrollment}
-                        </p>
-                        <p>
-                          <b>Room:</b> {student.roomNumber}
-                        </p>
-                        <p>
-                          <b>Phone:</b> {student.phoneNumber}
-                        </p>
-                        <p>
-                          <b>Father:</b> {student.fatherName}
-                        </p>
-                        <p>
-                          <b>Address:</b> {student.address}
-                        </p>
-                      </div>
-
-                      {/* ACTIONS */}
-                      <div className="mt-3 flex gap-4 text-sm font-medium">
-                        <button
-                          onClick={() =>
-                            navigate(`/edit-student/${student.enrollment}`)
-                          }
-                          className="text-blue-600 hover:underline"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => handleDelete(student.enrollment)}
-                          className="text-red-600 hover:underline"
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* RIGHT: IMAGE UPLOAD */}
-                    <div className="flex flex-col items-center ml-4">
-                      <label
-                        htmlFor={`img-${student.enrollment}`}
-                        className="w-28 h-36 rounded-xl overflow-hidden bg-gray-100 flex items-center justify-center cursor-pointer hover:opacity-80 transition border border-gray-300 shadow-sm"
-                      >
-                        {imageDB[student.enrollment] ? (
-                          <img
-                            src={imageDB[student.enrollment]}
-                            alt="Student"
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <span className="text-gray-400 text-xs text-center px-2">
-                            Click to upload
-                          </span>
-                        )}
-                      </label>
-                      <input
-                        id={`img-${student.enrollment}`}
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        onChange={(e) =>
-                          handleImageUpload(e, student.enrollment)
-                        }
-                      />
-                    </div>
+                    <h2 className="text-xl font-semibold text-blue-800">
+                      {student.name}
+                    </h2>
+                    <p className="text-sm text-gray-600 mt-1">
+                      Enrollment: {student.enrollment}
+                    </p>
                   </div>
                 ))}
+              </div>
+            )}
+
+            {/* 🔹 BOTTOM PAGINATION CONTROLS */}
+            {totalPages > 0 && (
+              <div className="flex justify-center items-center gap-2 mt-8 flex-wrap">
+                <button
+                  disabled={currentPage === 1}
+                  onClick={() => setCurrentPage((p) => p - 1)}
+                  className={`px-2 text-sm ${
+                    currentPage === 1
+                      ? "text-gray-400 cursor-not-allowed"
+                      : "text-blue-600 hover:underline"
+                  }`}
+                >
+                  Prev
+                </button>
+
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                  (page) => (
+                    <button
+                      key={page}
+                      onClick={() => setCurrentPage(page)}
+                      className={`px-3 py-1 text-sm rounded-md transition ${
+                        currentPage === page
+                          ? "bg-blue-600 text-white font-semibold"
+                          : "text-blue-600 hover:bg-blue-100"
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  )
+                )}
+
+                <button
+                  disabled={currentPage === totalPages}
+                  onClick={() => setCurrentPage((p) => p + 1)}
+                  className={`px-2 text-sm ${
+                    currentPage === totalPages
+                      ? "text-gray-400 cursor-not-allowed"
+                      : "text-blue-600 hover:underline"
+                  }`}
+                >
+                  Next
+                </button>
               </div>
             )}
           </div>
