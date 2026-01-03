@@ -1,6 +1,6 @@
 import { useSearchParams, useNavigate, useLocation } from "react-router-dom"; // added useNavigate & useLocation
 import { useState, useEffect } from "react";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "../../firebase/firebase";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -27,6 +27,9 @@ export default function StudentForm() {
     course: "",
     parentName: "",
     address: "",
+    travelDate: new Date().toISOString().slice(0,10),
+    returnDate: "",
+    reason: "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -107,25 +110,42 @@ export default function StudentForm() {
       room: "B-214",
       phone: "9876543210",
       place: "Gurgaon",
+      travelDate: new Date().toISOString().slice(0,10),
+      returnDate: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0,10),
+      reason: "Visiting home",
       parentName: passType === "home" ? "Rajesh Sharma" : "",
       address: passType === "home" ? "12, Sector 45, Gurgaon, Haryana" : "",
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const submissionData = { ...formData, passType, submittedAt: new Date() };
+    const submissionData = { ...formData, passType, submittedAt: new Date().toISOString(), status: "Pending" };
 
     console.log("Submitted Data:", submissionData);
 
-    // Store data in localStorage
+    // Store data in localStorage (backwards compatibility)
     const pastRequests =
       JSON.parse(localStorage.getItem("studentPasses")) || [];
     localStorage.setItem(
       "studentPasses",
       JSON.stringify([...pastRequests, submissionData])
     );
+
+    // set current student so dashboard can fetch requests
+    try {
+      if (formData.enrollment) localStorage.setItem("currentStudent", formData.enrollment);
+    } catch (e) {}
+
+    // Save to Firestore (use enrollment as document id in 'passRequest' collection)
+    try {
+      if (!submissionData.enrollment) throw new Error("Enrollment missing");
+      await setDoc(doc(db, "passRequest", submissionData.enrollment.trim()), submissionData);
+    } catch (err) {
+      console.error("Failed to save request to Firestore", err);
+      toast.error("Failed to submit request to server. Saved locally.");
+    }
 
     setSubmitted(true);
 
@@ -227,6 +247,43 @@ export default function StudentForm() {
               label="Place Going To"
               name="place"
               value={formData.place}
+              onChange={handleChange}
+              disabled={submitted}
+            />
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Travel Date
+              </label>
+              <input
+                type="date"
+                name="travelDate"
+                value={formData.travelDate}
+                onChange={handleChange}
+                disabled={submitted}
+                required
+                className="w-full border px-4 py-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none disabled:bg-gray-100"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Return Date (optional)
+              </label>
+              <input
+                type="date"
+                name="returnDate"
+                value={formData.returnDate}
+                onChange={handleChange}
+                disabled={submitted}
+                className="w-full border px-4 py-3 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none disabled:bg-gray-100"
+              />
+            </div>
+
+            <Input
+              label="Reason / Purpose"
+              name="reason"
+              value={formData.reason}
               onChange={handleChange}
               disabled={submitted}
             />

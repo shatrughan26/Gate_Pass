@@ -1,15 +1,11 @@
 import React, { useState, useEffect } from "react";
 import QRCode from "react-qr-code";
+import { doc, onSnapshot } from "firebase/firestore";
+import { db } from "../../firebase/firebase";
 
 export default function StudentDashboard() {
   const [activeTab, setActiveTab] = useState("home");
-  const [studentPasses, setStudentPasses] = useState(() => {
-    try {
-      return JSON.parse(localStorage.getItem("studentPasses")) || [];
-    } catch {
-      return [];
-    }
-  });
+  const [studentPasses, setStudentPasses] = useState([]);
   const [imageDB, setImageDB] = useState(() => {
     try {
       return JSON.parse(localStorage.getItem("studentImages")) || {};
@@ -18,26 +14,36 @@ export default function StudentDashboard() {
     }
   });
   const [selectedImage, setSelectedImage] = useState(null);
+  const [editingIndex, setEditingIndex] = useState(null);
+  const [editingDate, setEditingDate] = useState("");
 
   useEffect(() => {
-    // Simulate Warden approval for pending requests (run once on mount)
-    const passes = [...studentPasses];
+    // Subscribe to 'passRequest' doc for current logged-in student (if available)
+    const current = localStorage.getItem("currentStudent");
+    if (!current) {
+      // fallback: read localStorage-stored passes
+      try {
+        const local = JSON.parse(localStorage.getItem("studentPasses")) || [];
+        setStudentPasses(local);
+      } catch {
+        setStudentPasses([]);
+      }
+      return;
+    }
 
-    passes.forEach((pass, idx) => {
-      if (!pass.status || pass.status === "Pending") {
-        setTimeout(() => {
-          const status = Math.random() > 0.5 ? "Approved" : "Rejected";
-          const approvalTime = new Date().toISOString();
-          passes[idx] = { ...pass, status, approvedAt: approvalTime };
-          localStorage.setItem("studentPasses", JSON.stringify([...passes]));
-          setStudentPasses([...passes]);
-        }, 2000); // simulate delay
+    const unsub = onSnapshot(doc(db, "passRequest", current), (snap) => {
+      if (!snap.exists()) {
+        setStudentPasses([]);
+      } else {
+        setStudentPasses([{ id: snap.id, ...snap.data() }]);
       }
     });
+
+    return () => unsub();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const latestPass = studentPasses[studentPasses.length - 1];
+  const latestPass = studentPasses[0];
 
   const handleImageUpload = (e) => {
     if (!latestPass) return; // guard against no pass
@@ -62,6 +68,24 @@ export default function StudentDashboard() {
 
   const studentImage =
     (latestPass && imageDB[latestPass.enrollment]) || selectedImage;
+
+  const startEdit = (idx, currentDate) => {
+    setEditingIndex(idx);
+    setEditingDate(currentDate || new Date().toISOString().slice(0,10));
+  };
+
+  const cancelEdit = () => {
+    setEditingIndex(null);
+    setEditingDate("");
+  };
+
+  const saveEdit = (idx) => {
+    const updated = [...studentPasses];
+    updated[idx] = { ...updated[idx], travelDate: editingDate };
+    localStorage.setItem("studentPasses", JSON.stringify(updated));
+    setStudentPasses(updated);
+    cancelEdit();
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 p-8">
@@ -118,6 +142,9 @@ export default function StudentDashboard() {
                 </li>
                 <li>
                   <strong>Place:</strong> {latestPass.place}
+                </li>
+                <li>
+                  <strong>Travel Date:</strong> {latestPass.travelDate ? new Date(latestPass.travelDate).toLocaleDateString() : "-"}
                 </li>
                 {latestPass.passType === "home" && (
                   <>
@@ -180,11 +207,13 @@ export default function StudentDashboard() {
               <h2 className="text-2xl font-semibold text-indigo-600 mb-4">
                 Past Pass Requests
               </h2>
+              <p className="text-sm text-gray-500 mb-3">You can edit the travel date for Pending requests by clicking "Edit".</p>
               <div className="overflow-x-auto">
                 <table className="w-full table-auto border border-gray-200 rounded-lg">
                   <thead>
                     <tr className="bg-indigo-100 text-indigo-700">
                       <th className="border px-4 py-2">Submission Time</th>
+                      <th className="border px-4 py-2">Travel Date</th>
                       <th className="border px-4 py-2">Approval Time</th>
                       <th className="border px-4 py-2">Pass Type</th>
                       <th className="border px-4 py-2">Status</th>
@@ -204,6 +233,44 @@ export default function StudentDashboard() {
                       >
                         <td className="border px-4 py-2">
                           {new Date(req.submittedAt).toLocaleString()}
+                        </td>
+                        <td className="border px-4 py-2">
+                          {editingIndex === idx ? (
+                            <div className="flex items-center justify-center gap-2">
+                              <input
+                                type="date"
+                                value={editingDate}
+                                onChange={(e) => setEditingDate(e.target.value)}
+                                className="border px-2 py-1 rounded"
+                              />
+                              <button
+                                onClick={() => saveEdit(idx)}
+                                className="text-green-600"
+                              >
+                                Save
+                              </button>
+                              <button
+                                onClick={() => cancelEdit()}
+                                className="text-red-600"
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          ) : (
+                            <div>
+                              {req.travelDate ? new Date(req.travelDate).toLocaleDateString() : "-"}
+                              {(!req.status || req.status === "Pending") && (
+                                <div>
+                                  <button
+                                    onClick={() => startEdit(idx, req.travelDate)}
+                                    className="text-sm text-blue-600 hover:underline"
+                                  >
+                                    Edit
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          )}
                         </td>
                         <td className="border px-4 py-2">
                           {req.approvedAt

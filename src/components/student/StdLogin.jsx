@@ -28,6 +28,7 @@ export default function StudentLogin() {
       if (docSnap.exists()) {
         setStudentData(docSnap.data()); // fetched data
         setIsLoggedIn(true);
+        localStorage.setItem("currentStudent", enrollment.trim());
       } else {
         setError("Enrollment number not found");
       }

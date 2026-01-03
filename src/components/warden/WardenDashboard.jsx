@@ -86,12 +86,21 @@ export default function WardenDashboard() {
           {/* HEADER */}
           <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-6 flex justify-between items-center">
             <h1 className="text-3xl font-bold text-white">Warden Dashboard</h1>
-            <button
-              onClick={() => navigate("/student-info")}
-              className="bg-white text-blue-600 px-5 py-2 rounded-lg font-semibold hover:bg-blue-50 transition"
-            >
-              + Add Student
-            </button>
+            <div className="flex gap-3">
+              <button
+                onClick={() => navigate("/student-info")}
+                className="bg-white text-blue-600 px-5 py-2 rounded-lg font-semibold hover:bg-blue-50 transition"
+              >
+                + Add Student
+              </button>
+
+              <button
+                onClick={() => navigate("/warden/requests")}
+                className="bg-white text-indigo-600 px-5 py-2 rounded-lg font-semibold hover:bg-indigo-50 transition"
+              >
+                See Requests
+              </button>
+            </div>
           </div>
 
           {/* CONTENT */}

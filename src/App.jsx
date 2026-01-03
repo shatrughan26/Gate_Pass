@@ -7,6 +7,7 @@ import {
 import WardenLogin from "./components/warden/Wardenlogin";
 import WardenDashboard from "./components/warden/WardenDashboard";
 import WardenPortal from "./components/warden/Studentinfo";
+import StudentRequest from "./components/warden/StudentRequest";
 import GuardLogin from "./components/security-guard/Login.jsx";
 import GuardScanner from "./components/security-guard/Scanner.jsx";
 import StudentDetails from "./components/security-guard/StudentDetails.jsx";
@@ -31,6 +32,8 @@ function App() {
 
         <Route path="/edit-student/:enrollment" element={<EditStudent />} />
         <Route path="/warden-dashboard" element={<WardenDashboard />} />
+        <Route path="/warden/requests" element={<StudentRequest />} />
+        <Route path="/requests" element={<StudentRequest readOnly={true} />} />
 
         {/* Student Routes */}
         <Route path="/student/login" element={<StudentLogin />} />
