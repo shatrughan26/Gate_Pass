@@ -7,8 +7,9 @@ import {
   doc,
   query,
   orderBy,
+  serverTimestamp,
 } from "firebase/firestore";
-import { db, serverTimestamp } from "../../firebase/firebase";
+import { db } from "../../firebase/firebase";
 
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
@@ -22,11 +23,11 @@ export default function GuardDashboard() {
   const [outStudents, setOutStudents] = useState([]);
   const [inStudents, setInStudents] = useState([]);
 
-  /* Pagination */
+  /* ---------------- PAGINATION ---------------- */
   const ITEMS_PER_PAGE = 6;
   const [page, setPage] = useState(1);
 
-  /* ---------------- FIRESTORE ---------------- */
+  /* ---------------- FIRESTORE LISTENER ---------------- */
   useEffect(() => {
     const q = query(
       collection(db, "SavedData"),
@@ -67,7 +68,7 @@ export default function GuardDashboard() {
     [inStudents, search]
   );
 
-  /* ---------------- PAGINATION ---------------- */
+  /* ---------------- ACTIVE LIST ---------------- */
   const currentList = activeTab === "OUT" ? filteredOut : filteredIn;
   const totalPages = Math.ceil(currentList.length / ITEMS_PER_PAGE);
 
@@ -96,7 +97,7 @@ export default function GuardDashboard() {
     });
   };
 
-  /* ---------------- EXCEL EXPORT ---------------- */
+  /* ---------------- EXPORT EXCEL ---------------- */
   const exportExcel = () => {
     const data = currentList.map((s) => ({
       Name: s.name,
@@ -110,7 +111,7 @@ export default function GuardDashboard() {
 
     const ws = XLSX.utils.json_to_sheet(data);
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Daily Log");
+    XLSX.utils.book_append_sheet(wb, ws, "Gate Log");
 
     const buffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
     saveAs(
@@ -126,7 +127,7 @@ export default function GuardDashboard() {
         Guard Dashboard
       </h1>
 
-      {/* Live Counts */}
+      {/* Counts */}
       <div className="flex justify-center gap-4 mb-4">
         <span className="bg-red-100 text-red-700 px-4 py-1 rounded-full font-semibold">
           OUT: {filteredOut.length}
@@ -181,105 +182,67 @@ export default function GuardDashboard() {
         </button>
       </div>
 
-      {/* LIST */}
-      <div className="bg-white rounded-xl shadow p-4">
+      {/* TABLE */}
+      <div className="bg-white rounded-xl shadow p-4 overflow-x-auto">
+        <table className="w-full border-collapse">
+          <thead
+            className={`${
+              activeTab === "OUT"
+                ? "bg-red-100 text-red-700"
+                : "bg-green-100 text-green-700"
+            }`}
+          >
+            <tr>
+              <th className="p-2">Name</th>
+              <th className="p-2">Enrollment</th>
+              <th className="p-2">
+                {activeTab === "OUT" ? "OUT Time" : "IN Time"}
+              </th>
+              <th className="p-2">Action</th>
+            </tr>
+          </thead>
 
-        {/* MOBILE */}
-        <div className="grid gap-4 md:hidden">
-          {paginatedData.map((s) => (
-            <div
-              key={s.id}
-              className={`border rounded-xl p-4 ${
-                activeTab === "OUT" ? "bg-red-50" : "bg-green-50"
-              }`}
-            >
-              <p><b>Name:</b> {s.name}</p>
-              <p><b>Enrollment:</b> {s.enrollment}</p>
-              <p>
-                <b>{activeTab} Time:</b>{" "}
-                {activeTab === "OUT"
-                  ? s.outTime?.toDate?.().toLocaleTimeString() || "-"
-                  : s.inTime?.toDate?.().toLocaleTimeString() || "-"}
-              </p>
-
-              {activeTab === "OUT" ? (
-                <button
-                  onClick={() => markIn(s)}
-                  className="mt-3 w-full bg-green-600 text-white py-2 rounded-lg"
-                >
-                  ✔ Mark IN
-                </button>
-              ) : (
-                <button
-                  onClick={() => moveBackToOut(s)}
-                  className="mt-3 w-full bg-yellow-500 text-white py-2 rounded-lg"
-                >
-                  ↩ Move Back
-                </button>
-              )}
-            </div>
-          ))}
-        </div>
-
-        {/* DESKTOP TABLE */}
-        <div className="hidden md:block overflow-x-auto">
-          <table className="w-full border-collapse border rounded-lg">
-            <thead
-              className={`${
-                activeTab === "OUT"
-                  ? "bg-red-100 text-red-700"
-                  : "bg-green-100 text-green-700"
-              }`}
-            >
-              <tr>
-                <th className="border px-4 py-2">Name</th>
-                <th className="border px-4 py-2">Enrollment</th>
-                <th className="border px-4 py-2">
-                  {activeTab === "OUT" ? "OUT Time" : "IN Time"}
-                </th>
-                <th className="border px-4 py-2">Action</th>
+          <tbody>
+            {paginatedData.map((s) => (
+              <tr key={s.id} className="text-center border-t">
+                <td className="p-2">{s.name}</td>
+                <td className="p-2">{s.enrollment}</td>
+                <td className="p-2">
+                  {activeTab === "OUT"
+                    ? s.outTime?.toDate?.().toLocaleTimeString() || "-"
+                    : s.inTime?.toDate?.().toLocaleTimeString() || "-"}
+                </td>
+                <td className="p-2">
+                  {activeTab === "OUT" ? (
+                    <button
+                      onClick={() => markIn(s)}
+                      className="bg-green-600 text-white px-3 py-1 rounded"
+                    >
+                      ✔ Mark IN
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => moveBackToOut(s)}
+                      className="bg-yellow-500 text-white px-3 py-1 rounded"
+                    >
+                      ↩ Move Back
+                    </button>
+                  )}
+                </td>
               </tr>
-            </thead>
+            ))}
 
-            <tbody>
-              {paginatedData.map((s) => (
-                <tr
-                  key={s.id}
-                  className={`text-center ${
-                    activeTab === "OUT" ? "bg-red-50" : "bg-green-50"
-                  }`}
-                >
-                  <td className="border px-4 py-2">{s.name}</td>
-                  <td className="border px-4 py-2">{s.enrollment}</td>
-                  <td className="border px-4 py-2">
-                    {activeTab === "OUT"
-                      ? s.outTime?.toDate?.().toLocaleTimeString() || "-"
-                      : s.inTime?.toDate?.().toLocaleTimeString() || "-"}
-                  </td>
-                  <td className="border px-4 py-2">
-                    {activeTab === "OUT" ? (
-                      <button
-                        onClick={() => markIn(s)}
-                        className="bg-green-600 text-white px-4 py-1 rounded"
-                      >
-                        ✔ Mark IN
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => moveBackToOut(s)}
-                        className="bg-yellow-500 text-white px-4 py-1 rounded"
-                      >
-                        ↩ Move Back
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+            {paginatedData.length === 0 && (
+              <tr>
+                <td colSpan="4" className="p-4 text-center text-gray-500">
+                  No students found
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
 
-        {/* PAGINATION */}
+        {/* Pagination */}
         {totalPages > 1 && (
           <div className="flex justify-center gap-3 mt-4">
             <button

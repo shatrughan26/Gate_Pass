@@ -1,7 +1,14 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Scanner } from "@yudiel/react-qr-scanner";
-import { collection, query, where, getDocs, updateDoc } from "firebase/firestore";
+import {
+  doc,
+  getDoc,
+  addDoc,
+  collection,
+  updateDoc,
+  serverTimestamp,
+} from "firebase/firestore";
 import { db } from "../../firebase/firebase";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -15,31 +22,42 @@ const GuardScanner = () => {
   const handleScan = async (result) => {
     if (hasScanned) return;
 
-    const enrollment = result?.[0]?.rawValue;
-    if (!enrollment) return;
+    const rawValue = result?.[0]?.rawValue; // PASS-ASU2023010100063
+    if (!rawValue) return;
+
+    const enrollment = rawValue.replace("PASS-", "").trim();
+
+    console.log("RAW QR:", rawValue);
+    console.log("MATCHING ENROLLMENT:", enrollment);
 
     try {
-      // 🔍 Fetch student using enrollment
-      const q = query(
-        collection(db, "SavedData"),
-        where("enrollment", "==", enrollment)
-      );
+      // 🔹 1. VERIFY STUDENT
+      const studentRef = doc(db, "students", enrollment);
+      const studentSnap = await getDoc(studentRef);
 
-      const snapshot = await getDocs(q);
-
-      if (snapshot.empty) {
+      if (!studentSnap.exists()) {
         toast.error("Invalid QR ❌ Student not found");
         return;
       }
 
-      const docSnap = snapshot.docs[0];
-      const studentRef = docSnap.ref;
+      const studentData = studentSnap.data();
 
-      // 🕒 Mark OUT
+      // 🔹 2. SAVE MOVEMENT (CORRECT STRUCTURE)
+      await addDoc(collection(db, "SavedData"), {
+        enrollment,
+        name: studentData.name,
+        course: studentData.course || "",
+
+        status: "OUT",
+        outTime: serverTimestamp(),
+        inTime: null,
+        createdAt: serverTimestamp(),
+      });
+
+      // 🔹 3. UPDATE CURRENT STATUS
       await updateDoc(studentRef, {
         status: "OUT",
-        outTime: new Date().toLocaleTimeString(),
-        date: new Date().toLocaleDateString(),
+        lastOutTime: serverTimestamp(),
       });
 
       if (navigator.vibrate) navigator.vibrate(200);
@@ -61,7 +79,7 @@ const GuardScanner = () => {
 
   return (
     <>
-      <ToastContainer />
+      <ToastContainer position="top-center" autoClose={2000} />
 
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex flex-col items-center justify-center px-4">
         <h2 className="text-2xl font-semibold mb-6">Scan Student QR</h2>
