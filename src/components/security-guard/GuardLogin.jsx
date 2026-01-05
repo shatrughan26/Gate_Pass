@@ -130,10 +130,6 @@ export default function GuardLogin() {
             >
               Sign In
             </button>
-
-            <p className="text-xs text-center text-gray-500">
-              Demo: guard@example.com / asuguard123
-            </p>
           </div>
         </div>
       </div>
