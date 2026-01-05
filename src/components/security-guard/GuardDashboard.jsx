@@ -29,7 +29,10 @@ export default function GuardDashboard() {
 
   /* ---------------- FIRESTORE LISTENER ---------------- */
   useEffect(() => {
-    const q = query(collection(db, "SavedData"), orderBy("createdAt", "desc"));
+    const q = query(
+      collection(db, "SavedData"),
+      orderBy("createdAt", "desc")
+    );
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const out = [];
@@ -117,7 +120,8 @@ export default function GuardDashboard() {
 
     saveAs(
       new Blob([buffer], {
-        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        type:
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       }),
       `Gate_Log_${activeTab}_${new Date().toLocaleDateString()}.xlsx`
     );
@@ -128,20 +132,24 @@ export default function GuardDashboard() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-6">
       <div className="max-w-6xl mx-auto">
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+          
           {/* HEADER */}
           <div className="bg-gradient-to-r from-indigo-600 to-blue-600 px-8 py-6 flex justify-between items-center">
-            <h1 className="text-3xl font-bold text-white">Guard Dashboard</h1>
+            <h1 className="text-3xl font-bold text-white">
+              Guard Dashboard
+            </h1>
 
             <button
               onClick={() => navigate("/guard/scan")}
               className="bg-white text-indigo-600 px-5 py-2 rounded-lg font-semibold hover:bg-indigo-50 transition"
             >
-              QR Scan
+              📷 QR Scan
             </button>
           </div>
 
           {/* CONTENT */}
           <div className="p-8">
+
             {/* COUNTS */}
             <div className="flex justify-center gap-4 mb-6">
               <span className="bg-red-100 text-red-700 px-4 py-1 rounded-full font-semibold">
@@ -196,21 +204,29 @@ export default function GuardDashboard() {
               </p>
             ) : (
               <div
-                className="grid gap-4 mt-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:[grid-template-columns:repeat(auto-fit,minmax(180px,1fr))]"
+                className="
+                  grid gap-4 mt-6
+                  grid-cols-1
+                  sm:grid-cols-2
+                  md:grid-cols-3
+                  lg:[grid-template-columns:repeat(auto-fit,minmax(180px,1fr))]
+                "
               >
                 {paginatedData.map((s) => (
                   <div
                     key={s.id}
-                    className={`rounded-xl p-6 shadow-sm hover:shadow-lg transition cursor-default
-          ${
-            activeTab === "OUT"
-              ? "bg-red-50 hover:bg-red-100"
-              : "bg-green-50 hover:bg-green-100"
-          }`}
+                    className={`rounded-xl p-5 shadow-sm hover:shadow-lg transition
+                      ${
+                        activeTab === "OUT"
+                          ? "bg-red-50 hover:bg-red-100"
+                          : "bg-green-50 hover:bg-green-100"
+                      }`}
                   >
                     <h2
-                      className={`text-xl font-semibold ${
-                        activeTab === "OUT" ? "text-red-700" : "text-green-700"
+                      className={`text-lg font-semibold ${
+                        activeTab === "OUT"
+                          ? "text-red-700"
+                          : "text-green-700"
                       }`}
                     >
                       {s.name}
@@ -254,7 +270,7 @@ export default function GuardDashboard() {
 
             {/* PAGINATION */}
             {totalPages > 1 && (
-              <div className="flex justify-center items-center gap-4 mt-6">
+              <div className="flex justify-center items-center gap-4 mt-8">
                 <button
                   disabled={page === 1}
                   onClick={() => setPage(page - 1)}
