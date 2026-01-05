@@ -51,22 +51,22 @@ export default function GuardDashboard() {
     return () => unsubscribe();
   }, []);
 
-  /* ---------------- FILTER ---------------- */
-  const filterStudents = (list) =>
-    list.filter(
+  /* ---------------- FILTER (FIXED) ---------------- */
+  const filteredOut = useMemo(() => {
+    return outStudents.filter(
       (s) =>
         s.name?.toLowerCase().includes(search.toLowerCase()) ||
         s.enrollment?.toLowerCase().includes(search.toLowerCase())
     );
+  }, [outStudents, search]);
 
-  const filteredOut = useMemo(
-    () => filterStudents(outStudents),
-    [outStudents, search]
-  );
-  const filteredIn = useMemo(
-    () => filterStudents(inStudents),
-    [inStudents, search]
-  );
+  const filteredIn = useMemo(() => {
+    return inStudents.filter(
+      (s) =>
+        s.name?.toLowerCase().includes(search.toLowerCase()) ||
+        s.enrollment?.toLowerCase().includes(search.toLowerCase())
+    );
+  }, [inStudents, search]);
 
   /* ---------------- ACTIVE LIST ---------------- */
   const currentList = activeTab === "OUT" ? filteredOut : filteredIn;
@@ -114,9 +114,13 @@ export default function GuardDashboard() {
     XLSX.utils.book_append_sheet(wb, ws, "Gate Log");
 
     const buffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+
     saveAs(
-      new Blob([buffer], { type: "application/octet-stream" }),
-      `Gate_Log_${new Date().toLocaleDateString()}.xlsx`
+      new Blob([buffer], {
+        type:
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      }),
+      `Gate_Log_${activeTab}_${new Date().toLocaleDateString()}.xlsx`
     );
   };
 
