@@ -62,11 +62,8 @@ export default function StudentCard() {
     const reader = new FileReader();
     reader.onload = () => {
       const base64 = reader.result;
-
-      // Update local state
       setImage(base64);
 
-      // Save to localStorage
       const updatedImages = { ...storedImages, [enrollment]: base64 };
       localStorage.setItem("studentImages", JSON.stringify(updatedImages));
     };
@@ -92,37 +89,39 @@ export default function StudentCard() {
         </button>
 
         <div className="flex flex-col md:flex-row gap-8">
-         {/* IMAGE */}
-<div className="w-40 h-52 rounded-xl overflow-hidden bg-gray-100 border flex flex-col items-center justify-center relative">
-  {image ? (
-    <img
-      src={image}
-      alt="Student"
-      className="w-full h-full object-cover"
-    />
-  ) : (
-    <div className="flex flex-col items-center justify-center h-full w-full text-gray-500">
-      <span className="text-sm">Click to upload image</span>
-    </div>
-  )}
+          {/* IMAGE */}
+          <div className="w-40 h-52 rounded-xl overflow-hidden bg-gray-100 border flex flex-col items-center justify-center relative">
+            {image ? (
+              <img
+                src={image}
+                alt="Student"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="flex flex-col items-center justify-center h-full w-full text-gray-500">
+                <span className="text-sm">Click to upload image</span>
+              </div>
+            )}
 
-  {/* 🔹 Hidden file input triggered by overlay */}
-  <input
-    type="file"
-    accept="image/*"
-    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-    onChange={handleImageUpload}
-  />
-</div>
-
-
+            <input
+              type="file"
+              accept="image/*"
+              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+              onChange={handleImageUpload}
+            />
+          </div>
 
           {/* DETAILS */}
           <div className="flex-1 space-y-2 text-gray-700">
-            <h2 className="text-2xl font-bold text-blue-800">{student.name}</h2>
+            <h2 className="text-2xl font-bold text-blue-800">
+              {student.name}
+            </h2>
 
             <p>
               <b>Enrollment:</b> {student.enrollment}
+            </p>
+            <p>
+              <b>Course:</b> {student.course}
             </p>
             <p>
               <b>Room:</b> {student.roomNumber}

@@ -7,8 +7,9 @@ import {
   doc,
   query,
   orderBy,
+  serverTimestamp,
 } from "firebase/firestore";
-import { db, serverTimestamp } from "../../firebase/firebase";
+import { db } from "../../firebase/firebase";
 
 export default function GuardDashboard() {
   const navigate = useNavigate();
@@ -23,13 +24,13 @@ export default function GuardDashboard() {
       orderBy("createdAt", "desc")
     );
 
-    // 🔥 Real-time listener
     const unsubscribe = onSnapshot(q, (snapshot) => {
       const out = [];
       const inside = [];
 
       snapshot.forEach((docSnap) => {
         const data = { id: docSnap.id, ...docSnap.data() };
+
         if (data.status === "OUT") out.push(data);
         if (data.status === "IN") inside.push(data);
       });
@@ -51,7 +52,7 @@ export default function GuardDashboard() {
     });
   };
 
-  // 🔁 Mistouch correction → move back to OUT
+  // 🔁 Mistake correction
   const moveBackToOut = async (student) => {
     const ref = doc(db, "SavedData", student.id);
 
@@ -108,7 +109,6 @@ export default function GuardDashboard() {
               <tr>
                 <th className="p-2">Name</th>
                 <th className="p-2">Enrollment</th>
-                <th className="p-2">Date</th>
                 <th className="p-2">OUT Time</th>
                 <th className="p-2">Action</th>
               </tr>
@@ -118,7 +118,6 @@ export default function GuardDashboard() {
                 <tr key={s.id} className="text-center border-t">
                   <td>{s.name}</td>
                   <td>{s.enrollment}</td>
-                  <td>{s.date}</td>
                   <td>
                     {s.outTime?.toDate
                       ? s.outTime.toDate().toLocaleTimeString()
@@ -137,7 +136,7 @@ export default function GuardDashboard() {
 
               {outStudents.length === 0 && (
                 <tr>
-                  <td colSpan="5" className="p-4 text-center text-gray-500">
+                  <td colSpan="4" className="p-4 text-center text-gray-500">
                     No students outside
                   </td>
                 </tr>

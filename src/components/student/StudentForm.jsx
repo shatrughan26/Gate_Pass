@@ -136,7 +136,9 @@ export default function StudentForm() {
     // set current student so dashboard can fetch requests
     try {
       if (formData.enrollment) localStorage.setItem("currentStudent", formData.enrollment);
-    } catch (e) {}
+    } catch (e) {
+      console.error("Failed to set current student in localStorage", e);
+    }
 
     // Save to Firestore (use enrollment as document id in 'passRequest' collection)
     try {
@@ -337,7 +339,7 @@ export default function StudentForm() {
             {/* Dashboard Shortcut */}
             <button
               type="button"
-              onClick={() => navigate("/student-dashboard")}
+              onClick={() => navigate("/student/dashboard")}
               className="w-full mt-2 py-3 rounded-lg font-semibold bg-red-600 text-white hover:bg-red-700"
             >
               Go to Student Dashboard
