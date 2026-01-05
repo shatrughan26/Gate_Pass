@@ -102,21 +102,21 @@ export default function StudentForm() {
   };
 
   // ✅ DEMO AUTOFILL
-  const fillDemoData = () => {
-    setFormData({
-      name: "Rohan Sharma",
-      enrollment: "ASU2023001",
-      course: "B.Tech CSE",
-      room: "B-214",
-      phone: "9876543210",
-      place: "Gurgaon",
-      travelDate: new Date().toISOString().slice(0,10),
-      returnDate: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0,10),
-      reason: "Visiting home",
-      parentName: passType === "home" ? "Rajesh Sharma" : "",
-      address: passType === "home" ? "12, Sector 45, Gurgaon, Haryana" : "",
-    });
-  };
+  // const fillDemoData = () => {
+  //   setFormData({
+  //     name: "Rohan Sharma",
+  //     enrollment: "ASU2023001",
+  //     course: "B.Tech CSE",
+  //     room: "B-214",
+  //     phone: "9876543210",
+  //     place: "Gurgaon",
+  //     travelDate: new Date().toISOString().slice(0,10),
+  //     returnDate: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0,10),
+  //     reason: "Visiting home",
+  //     parentName: passType === "home" ? "Rajesh Sharma" : "",
+  //     address: passType === "home" ? "12, Sector 45, Gurgaon, Haryana" : "",
+  //   });
+  // };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -184,14 +184,14 @@ export default function StudentForm() {
           {/* Form */}
           <form onSubmit={handleSubmit} className="p-8 space-y-5">
             {/* Demo Button */}
-            <button
+            {/* <button
               type="button"
               onClick={fillDemoData}
               disabled={submitted}
               className="w-full border border-blue-600 text-blue-600 py-2 rounded-lg hover:bg-blue-50 transition font-medium disabled:opacity-50"
             >
               Autofill Demo Data
-            </button>
+            </button> */}
 
             {/* Loading / Fetch Error */}
             {loading && (
