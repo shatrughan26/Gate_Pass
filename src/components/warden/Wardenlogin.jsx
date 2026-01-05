@@ -27,7 +27,7 @@ export default function WardenLogin() {
         return;
       }
 
-      navigate('/warden-dashboard');
+      navigate('/warden/dashboard');
     } catch (err) {
       // Friendly message for missing Firebase configuration
       if (err && (err.code === 'auth/configuration-not-found' || String(err.message).toLowerCase().includes('configuration'))) {
