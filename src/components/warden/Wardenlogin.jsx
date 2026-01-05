@@ -104,8 +104,6 @@ export default function WardenLogin() {
             >
               Sign In
             </button>
-
-            <p className="text-xs text-center text-gray-500">Demo: warden@example.com / warden123 (create via Firebase Console or use `createUser` helper)</p>
           </div>
         </div>
       </div>
