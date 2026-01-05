@@ -134,7 +134,7 @@ export default function StudentLogin() {
               <div className="mt-2">
                 <button
                   type="button"
-                  onClick={() => navigate("/student-dashboard")}
+                  onClick={() => navigate("/student/dashboard")}
                   className="w-full py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold"
                 >
                   Student Dashboard

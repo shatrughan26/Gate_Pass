@@ -49,7 +49,7 @@ const handleSave = async () => {
     });
 
     setTimeout(() => {
-      navigate("/warden-dashboard");
+      navigate("/warden/dashboard");
     }, 1500);
   } catch (err) {
     console.error(err);

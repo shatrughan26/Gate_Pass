@@ -17,7 +17,8 @@ export default function UserSelect() {
       value: "warden",
       color: "bg-yellow-400",
       icon: <FaUserShield className="text-4xl text-white mb-2" />,
-      path: "/login",
+      path: "/warden/login",
+      
     },
     {
       name: "Guard",

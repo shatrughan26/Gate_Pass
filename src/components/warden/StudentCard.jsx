@@ -42,7 +42,7 @@ export default function StudentCard() {
     try {
       await deleteDoc(doc(db, "students", enrollment));
       alert("Student deleted successfully");
-      navigate("/warden-dashboard");
+      navigate("/warden/dashboard");
     } catch (error) {
       console.error(error);
       alert("Failed to delete student");

@@ -31,7 +31,7 @@ export default function GuardLogin() {
         return;
       }
 
-      navigate("/guard/scan");
+      navigate("/guard/dashboard");
     } catch (err) {
       if (
         err &&

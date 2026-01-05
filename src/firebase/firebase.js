@@ -1,9 +1,13 @@
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 import { getAuth } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
+import {
+  getFirestore,
+  serverTimestamp,
+  Timestamp,
+} from "firebase/firestore";
 
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+// Firebase configuration
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "",
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "",
@@ -11,13 +15,15 @@ const firebaseConfig = {
   storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "",
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "",
   appId: import.meta.env.VITE_FIREBASE_APP_ID || "",
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || ""
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || "",
 };
 
-// Basic configuration check to provide helpful diagnostics when env vars are missing
+// Required keys check
 const requiredKeys = ["apiKey", "authDomain", "projectId", "appId"];
 const missingKeys = requiredKeys.filter((k) => !firebaseConfig[k]);
+
 export const isFirebaseConfigured = missingKeys.length === 0;
+
 if (!isFirebaseConfigured) {
   console.error(
     `[Firebase] Missing configuration keys: ${missingKeys.join(", ")}. ` +
@@ -38,18 +44,25 @@ if (isFirebaseConfigured) {
       analytics = getAnalytics(app);
     }
   } catch (e) {
-    // analytics may fail in some environments; ignore
     console.warn("Firebase analytics not initialized:", e);
   }
 
   auth = getAuth(app);
   db = getFirestore(app);
 } else {
-  // Do not initialize Firebase SDKs if config is missing to avoid confusing runtime errors.
   console.warn(
-    "Firebase not initialized: missing configuration. Authentication and Firestore are disabled until config is provided."
+    "Firebase not initialized: missing configuration. Authentication and Firestore are disabled."
   );
 }
 
-export { app, auth, db, analytics };
+/* 🔥 EXPORTS REQUIRED BY GUARD DASHBOARD */
+export {
+  app,
+  auth,
+  db,
+  analytics,
+  serverTimestamp,
+  Timestamp,
+};
+
 export default app;

@@ -151,7 +151,7 @@ export default function StudentInfo() {
 
         <button
           className="w-full mt-4 text-blue-600 hover:underline"
-          onClick={() => navigate("/warden-dashboard")}
+          onClick={() => navigate("/warden/dashboard")}
         >
           Go to Warden Dashboard
         </button>
