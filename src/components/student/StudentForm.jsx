@@ -159,7 +159,7 @@ export default function StudentForm() {
 
     // Redirect after short delay
     setTimeout(() => {
-      navigate("/student-dashboard");
+      navigate("/student/dashboard");
     }, 1500);
   };
 
