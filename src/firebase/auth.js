@@ -35,7 +35,6 @@ export function onAuth(cb) {
 export async function createUser(email, password, role = "student") {
   ensureConfigured();
   const userCred = await createUserWithEmailAndPassword(auth, email, password);
-  // store role in users collection
   await setDoc(doc(db, "users", userCred.user.uid), { role, email });
   return userCred;
 }
@@ -46,4 +45,5 @@ export async function getUserRole(uid) {
   return snap.exists() ? snap.data().role : null;
 }
 
-export { db };
+// 🔥 REQUIRED EXPORTS
+export { auth, db };

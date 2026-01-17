@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { doc, getDoc } from "firebase/firestore";
-import { db } from "../../firebase/firebase";
+import { signOut } from "firebase/auth";
+import { auth, db } from "../../firebase/firebase";
 import asuLogo from "../../assets/asu-logo.png";
 
 export default function StudentLogin() {
@@ -11,6 +12,20 @@ export default function StudentLogin() {
   const [error, setError] = useState("");
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [studentData, setStudentData] = useState(null);
+
+  // ✅ IMPORTANT: Logout any staff (warden/guard) when student page loads
+  useEffect(() => {
+    const logoutStaff = async () => {
+      try {
+        await signOut(auth);
+        console.log("Firebase Auth cleared for student flow");
+      } catch (err) {
+        console.error("Failed to sign out staff", err);
+      }
+    };
+
+    logoutStaff();
+  }, []);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -26,7 +41,7 @@ export default function StudentLogin() {
       const docSnap = await getDoc(docRef);
 
       if (docSnap.exists()) {
-        setStudentData(docSnap.data()); // fetched data
+        setStudentData(docSnap.data());
         setIsLoggedIn(true);
         localStorage.setItem("currentStudent", enrollment.trim());
       } else {
@@ -39,7 +54,6 @@ export default function StudentLogin() {
   };
 
   const handlePassSelect = (type) => {
-    // pass both enrollment and studentData so StudentForm can autofill
     navigate(`/student/form?type=${type}`, {
       state: { studentData, enrollment },
     });
@@ -50,12 +64,12 @@ export default function StudentLogin() {
       <div className="w-full max-w-md">
         <div className="bg-white rounded-lg shadow-xl p-8">
 
+          {/* Back */}
           <div className="mb-4">
             <button
               type="button"
               onClick={() => navigate(-1)}
-              className="text-sm text-blue-600 hover:underline flex items-center gap-2"
-              aria-label="Go back"
+              className="text-sm text-blue-600 hover:underline"
             >
               ← Back
             </button>
@@ -82,7 +96,7 @@ export default function StudentLogin() {
 
           <div className="border-t border-gray-200 my-6"></div>
 
-          {/* FETCH PHASE */}
+          {/* LOGIN PHASE */}
           {!isLoggedIn && (
             <form onSubmit={handleLogin}>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -92,7 +106,9 @@ export default function StudentLogin() {
               <input
                 type="text"
                 value={enrollment}
-                onChange={(e) => setEnrollment(e.target.value.toUpperCase())}
+                onChange={(e) =>
+                  setEnrollment(e.target.value.toUpperCase())
+                }
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 mb-4"
                 placeholder="Enter enrollment number"
               />
@@ -103,17 +119,17 @@ export default function StudentLogin() {
 
               <button
                 type="submit"
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg shadow-md"
+                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg"
               >
                 Fetch Student Data
               </button>
             </form>
           )}
 
-          {/* PASS TYPE PHASE */}
+          {/* PASS SELECTION */}
           {isLoggedIn && (
             <div className="space-y-4">
-              <h3 className="text-xl font-semibold text-center mb-2">
+              <h3 className="text-xl font-semibold text-center">
                 Welcome, {studentData?.name}
               </h3>
 
@@ -131,15 +147,12 @@ export default function StudentLogin() {
                 Home Pass
               </button>
 
-              <div className="mt-2">
-                <button
-                  type="button"
-                  onClick={() => navigate("/student/dashboard")}
-                  className="w-full py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold"
-                >
-                  Student Dashboard
-                </button>
-              </div>
+              <button
+                onClick={() => navigate("/student/dashboard")}
+                className="w-full py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-semibold"
+              >
+                Student Dashboard
+              </button>
             </div>
           )}
 
