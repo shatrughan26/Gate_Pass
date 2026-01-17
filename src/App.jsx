@@ -5,61 +5,193 @@ import {
   Navigate,
 } from "react-router-dom";
 
-/* Warden Components */
+import { AuthProvider } from "./Context/AuthContext";
+import RoleProtectedRoute from "./Scripts/RoleProtectedRoute";
+
+/* ---------- COMMON ---------- */
+import UserSelect from "./components/Userselect";
+import HomeRedirect from "./HomeRedirect";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
+/* ---------- WARDEN ---------- */
 import WardenLogin from "./components/warden/Wardenlogin";
 import WardenDashboard from "./components/warden/WardenDashboard";
 import WardenPortal from "./components/warden/Studentinfo";
 import StudentRequest from "./components/warden/StudentRequest";
 import EditStudent from "./components/warden/EditStudent";
-import StudentCard from "./components/warden/StudentCard.jsx";
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import StudentCard from "./components/warden/StudentCard";
 
-/* Student Components */
+/* ---------- STUDENT ---------- */
 import StudentLogin from "./components/student/StdLogin";
 import StudentDashboard from "./components/student/Studentdashboard";
 import StudentForm from "./components/student/StudentForm";
 
-/* Guard Components */
+/* ---------- GUARD ---------- */
 import GuardLogin from "./components/security-guard/GuardLogin";
 import GuardDashboard from "./components/security-guard/GuardDashboard";
 import GuardScanner from "./components/security-guard/Scanner";
 import StudentDetails from "./components/security-guard/StudentDetails";
 import GuardExitSuccess from "./components/security-guard/GuardExitSuccess";
 
-/* Common */
-import UserSelect from "./components/Userselect";
-
 function App() {
   return (
     <Router>
-      <Routes>
-        {/* Default */}
-        <Route path="/" element={<UserSelect />} />
+      <AuthProvider>
+        <ToastContainer />
 
-        {/* ---------------- WARDEN ROUTES ---------------- */}
-        <Route path="/warden/login" element={<WardenLogin />} />
-        <Route path="/warden/dashboard" element={<WardenDashboard />} />
-        <Route path="/student-info" element={<WardenPortal />} />
-        <Route path="/warden/requests" element={<StudentRequest />} />
-        <Route path="/edit-student/:enrollment" element={<EditStudent />} />
-        <Route path="/student-details/:enrollment" element={<StudentCard />} />
+        <Routes>
+          {/* ---------- SMART ROOT ---------- */}
+          <Route path="/" element={<HomeRedirect />} />
 
-        {/* ---------------- STUDENT ROUTES ---------------- */}
-        <Route path="/student/login" element={<StudentLogin />} />
-        <Route path="/student/dashboard" element={<StudentDashboard />} />
-        <Route path="/student/form" element={<StudentForm />} />
+          {/* ---------- USER SELECTION ---------- */}
+          <Route path="/select" element={<UserSelect />} />
 
-        {/* ---------------- GUARD ROUTES ---------------- */}
-        <Route path="/guard/login" element={<GuardLogin />} />
-        <Route path="/guard/dashboard" element={<GuardDashboard />} />
-        <Route path="/guard/scan" element={<GuardScanner />} />
-        <Route path="/guard/student" element={<StudentDetails />} />
-        <Route path="/guard/success" element={<GuardExitSuccess />} />
+          {/* ---------- WARDEN ---------- */}
+          <Route path="/warden/login" element={<WardenLogin />} />
 
-        {/* Fallback */}
-        <Route path="*" element={<Navigate to="/" />} />
-      </Routes>
+          <Route
+            path="/warden/dashboard"
+            element={
+              <RoleProtectedRoute
+                allowedRole="warden"
+                redirectTo="/warden/login"
+              >
+                <WardenDashboard />
+              </RoleProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/student-info"
+            element={
+              <RoleProtectedRoute
+                allowedRole="warden"
+                redirectTo="/warden/login"
+              >
+                <WardenPortal />
+              </RoleProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/warden/requests"
+            element={
+              <RoleProtectedRoute
+                allowedRole="warden"
+                redirectTo="/warden/login"
+              >
+                <StudentRequest />
+              </RoleProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/edit-student/:enrollment"
+            element={
+              <RoleProtectedRoute
+                allowedRole="warden"
+                redirectTo="/warden/login"
+              >
+                <EditStudent />
+              </RoleProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/student-details/:enrollment"
+            element={
+              <RoleProtectedRoute
+                allowedRole="warden"
+                redirectTo="/warden/login"
+              >
+                <StudentCard />
+              </RoleProtectedRoute>
+            }
+          />
+
+          {/* ---------- STUDENT ---------- */}
+          <Route path="/student/login" element={<StudentLogin />} />
+
+          <Route
+            path="/student/dashboard"
+            element={
+              <RoleProtectedRoute
+                allowedRole="student"
+                redirectTo="/student/login"
+              >
+                <StudentDashboard />
+              </RoleProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/student/form"
+            element={
+              <RoleProtectedRoute
+                allowedRole="student"
+                redirectTo="/student/login"
+              >
+                <StudentForm />
+              </RoleProtectedRoute>
+            }
+          />
+
+          {/* ---------- GUARD ---------- */}
+          <Route path="/guard/login" element={<GuardLogin />} />
+
+          <Route
+            path="/guard/dashboard"
+            element={
+              <RoleProtectedRoute
+                allowedRole="guard"
+                redirectTo="/guard/login"
+              >
+                <GuardDashboard />
+              </RoleProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/guard/scan"
+            element={
+              <RoleProtectedRoute
+                allowedRole="guard"
+                redirectTo="/guard/login"
+              >
+                <GuardScanner />
+              </RoleProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/guard/student"
+            element={
+              <RoleProtectedRoute
+                allowedRole="guard"
+                redirectTo="/guard/login"
+              >
+                <StudentDetails />
+              </RoleProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/guard/success"
+            element={
+              <RoleProtectedRoute
+                allowedRole="guard"
+                redirectTo="/guard/login"
+              >
+                <GuardExitSuccess />
+              </RoleProtectedRoute>
+            }
+          />
+
+          {/* ---------- FALLBACK ---------- */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </AuthProvider>
     </Router>
   );
 }

@@ -1,11 +1,8 @@
+// firebase.js
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 import { getAuth } from "firebase/auth";
-import {
-  getFirestore,
-  serverTimestamp,
-  Timestamp,
-} from "firebase/firestore";
+import { getFirestore, serverTimestamp, Timestamp } from "firebase/firestore";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -18,7 +15,7 @@ const firebaseConfig = {
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || "",
 };
 
-// Required keys check
+// Check required keys
 const requiredKeys = ["apiKey", "authDomain", "projectId", "appId"];
 const missingKeys = requiredKeys.filter((k) => !firebaseConfig[k]);
 
@@ -26,43 +23,29 @@ export const isFirebaseConfigured = missingKeys.length === 0;
 
 if (!isFirebaseConfigured) {
   console.error(
-    `[Firebase] Missing configuration keys: ${missingKeys.join(", ")}. ` +
-      `Create a ".env.local" (copy ".env.example") and fill the VITE_FIREBASE_* values, then restart the dev server.`
+    `[Firebase] Missing keys: ${missingKeys.join(
+      ", "
+    )}. Fill VITE_FIREBASE_* in .env.local and restart dev server.`
   );
 }
 
-let app;
-let analytics;
-let auth;
-let db;
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
 
-if (isFirebaseConfigured) {
-  app = initializeApp(firebaseConfig);
-
+// Analytics
+let analytics = null;
+if (typeof window !== "undefined" && firebaseConfig.measurementId) {
   try {
-    if (typeof window !== "undefined" && firebaseConfig.measurementId) {
-      analytics = getAnalytics(app);
-    }
+    analytics = getAnalytics(app);
   } catch (e) {
     console.warn("Firebase analytics not initialized:", e);
   }
-
-  auth = getAuth(app);
-  db = getFirestore(app);
-} else {
-  console.warn(
-    "Firebase not initialized: missing configuration. Authentication and Firestore are disabled."
-  );
 }
 
-/* 🔥 EXPORTS REQUIRED BY GUARD DASHBOARD */
-export {
-  app,
-  auth,
-  db,
-  analytics,
-  serverTimestamp,
-  Timestamp,
-};
+// Auth & Firestore
+const auth = getAuth(app);
+const db = getFirestore(app);
 
+// 🔥 Safe named exports
+export { app, auth, db, analytics, serverTimestamp, Timestamp };
 export default app;
