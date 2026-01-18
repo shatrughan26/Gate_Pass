@@ -113,7 +113,7 @@ function App() {
           {/* ---------- STUDENT ---------- */}
           <Route path="/student/login" element={<StudentLogin />} />
 
-          <Route
+          {/* <Route
             path="/student/dashboard"
             element={
               <RoleProtectedRoute
@@ -135,7 +135,10 @@ function App() {
                 <StudentForm />
               </RoleProtectedRoute>
             }
-          />
+          /> */}
+          <Route path="/student/dashboard" element={<StudentDashboard />} />
+          <Route path="/student/form" element={<StudentForm />} />
+
 
           {/* ---------- GUARD ---------- */}
           <Route path="/guard/login" element={<GuardLogin />} />
