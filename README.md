@@ -5,7 +5,7 @@
 The Gate Pass Management System is a web-based application designed to streamline the process of issuing and managing gate passes for students within a university campus. It ensures secure authentication, real-time data handling, and role-based access for students and warden and guard with QR based verification and automatic in and out time registration.
 
 This project focuses on a **frontend-driven architecture** powered by **Firebase services** for backend operations such as authentication, database, and hosting.
-
+Checkout the website: https://local-pass-18424.web.app/
 ---
 
 ## 🚀 Features
